@@ -1,0 +1,23 @@
+﻿@{
+    Layout = "_AdminLayout";
+    //Assets.BodyAttributes.AppendCssClass("minimal-admin");
+}
+
+<div class="section-header">
+    <div class="title">
+        <i class="fa fa-user"></i>
+        Businesses
+    </div>
+    <div class="options">
+        <zone name="admin_button_toolbar_before" />
+
+        <zone name="admin_button_toolbar_after" />
+    </div>
+</div>
+
+@{
+    var gridViewData = new ViewDataDictionary(this.ViewData);
+    gridViewData["Parent"] = Model;
+}
+
+<partial name="Grids/_Grid.Business" model="null" view-data="gridViewData" />

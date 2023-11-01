@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BizsolTech.Chatbot.Services;
+using Microsoft.EntityFrameworkCore;
 using Smartstore.Core.Data;
 using Smartstore.Data;
 using Smartstore.Data.Providers;
@@ -12,6 +13,7 @@ namespace BizsolTech.Chatbot
         public override void ConfigureServices(IServiceCollection services, IApplicationContext appContext)
         {
             services.AddTransient<IDbContextConfigurationSource<SmartDbContext>, SmartDbContextConfigurer>();
+            services.AddScoped<IBusinessService,BusinessService>();
         }
 
         class SmartDbContextConfigurer : IDbContextConfigurationSource<SmartDbContext>

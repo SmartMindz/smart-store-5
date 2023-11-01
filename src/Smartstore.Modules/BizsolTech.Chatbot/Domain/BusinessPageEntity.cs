@@ -21,23 +21,4 @@ namespace BizsolTech.Chatbot.Domain
         public DateTime CreatedOnUtc { get; set; }
         public DateTime UpdatedOnUtc { get; set; }
     }
-    [Table("BusinessChats")]
-    public class BusinessChatEntity : BaseEntity, IAuditable
-    {
-        public int BusinessPageId { get; set; }
-        public string SenderId { get; set; } = string.Empty;
-        public string Question { get; set; } = string.Empty;
-        public string Answer { get; set; } = string.Empty;
-        public DateTime CreatedOnUtc { get; set; }
-        public DateTime UpdatedOnUtc { get; set; }
-    }
-    [Table("BusinessFacts")]
-    public class BusinessFactEntity : BaseEntity, IAuditable
-    {
-        public int BusinessPageId { get; set; }
-        public string? Fact { get; set; }
-        public string? Text { get; set; }
-        public DateTime CreatedOnUtc { get; set; }
-        public DateTime UpdatedOnUtc { get; set; }
-    }
 }
