@@ -1,0 +1,43 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Smartstore;
+using Smartstore.Domain;
+
+namespace BizsolTech.Chatbot.Domain
+{
+    [Table("BusinessPages")]
+    public class BusinessPageEntity : BaseEntity, IAuditable,IActivatable
+    {
+        public int AdminId { get; set; }
+        public long? FBPageId { get; set; }
+        public string? FBAccessToken { get; set; }
+        public bool FBStatus { get; set; }
+        public string? FBWebhookVerifyToken { get; set; }
+        public bool FBWebhookStatus { get; set; }
+        public string? OpenAPIKey { get; set; }
+        public bool OpenAPIStatus { get; set; }
+        public string? AzureOpenAPIKey { get; set; }
+        public bool AzureOpenAPIStatus { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedOnUtc { get; set; }
+        public DateTime UpdatedOnUtc { get; set; }
+    }
+    [Table("BusinessChats")]
+    public class BusinessChatEntity : BaseEntity, IAuditable
+    {
+        public int BusinessPageId { get; set; }
+        public string SenderId { get; set; } = string.Empty;
+        public string Question { get; set; } = string.Empty;
+        public string Answer { get; set; } = string.Empty;
+        public DateTime CreatedOnUtc { get; set; }
+        public DateTime UpdatedOnUtc { get; set; }
+    }
+    [Table("BusinessFacts")]
+    public class BusinessFactEntity : BaseEntity, IAuditable
+    {
+        public int BusinessPageId { get; set; }
+        public string? Fact { get; set; }
+        public string? Text { get; set; }
+        public DateTime CreatedOnUtc { get; set; }
+        public DateTime UpdatedOnUtc { get; set; }
+    }
+}

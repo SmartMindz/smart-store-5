@@ -1,0 +1,14 @@
+{
+  "$schema": "../module.schema.json",
+  "Author": "BizsolTech LLC",
+  "Group": "Social",
+  "SystemName": "BizsolTech.Chatbot",
+  "FriendlyName": "BizsolTech Chatbot",
+  "Description": "Connect your business page with OpenAI",
+  "Version": "5.0.5",
+  "MinAppVersion": "5.0.5",
+  "Order": 1,
+  "ResourceRootKey": "Plugins.Payments.AmazonPay",
+  "ProjectUrl": "http://community.smartstore.com/marketplace/file/11-amazon-payments-plugin/",
+  "PrivateReferences": [  ]
+}
