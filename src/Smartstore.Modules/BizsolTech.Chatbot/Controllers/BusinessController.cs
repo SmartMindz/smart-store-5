@@ -1,4 +1,5 @@
 ﻿using BizsolTech.Chatbot.Domain;
+using BizsolTech.Chatbot.Models;
 using BizsolTech.Chatbot.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
@@ -24,10 +25,11 @@ namespace BizsolTech.Chatbot.Controllers
         [HttpGet]
         public IActionResult List()
         {
-            return View();
+            var model = new BusinessListModel();
+            return View(model);
         }
         [HttpPost]
-        public async Task<IActionResult> List(GridCommand command)
+        public async Task<IActionResult> BusinessList(GridCommand command, BusinessListModel model)
         {
             var businessList = await _businessService.GetAllAsync();
             return Ok(new GridModel<BusinessPageEntity>

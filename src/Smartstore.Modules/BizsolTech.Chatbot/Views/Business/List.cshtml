@@ -1,19 +1,25 @@
-﻿@{
+﻿@using BizsolTech.Chatbot.Models;
+@model BusinessListModel
+
+@{
+    ViewBag.Title = "Business";
     Layout = "_AdminLayout";
-    //Assets.BodyAttributes.AppendCssClass("minimal-admin");
+    Assets.BodyAttributes.AppendCssClass("spa-layout");
 }
 
-<div class="section-header">
-    <div class="title">
-        <i class="fa fa-user"></i>
-        Businesses
-    </div>
-    <div class="options">
-        <zone name="admin_button_toolbar_before" />
+<form method="post" asp-action="List">
+    <div class="section-header">
+        <div class="title">
+            <i class="fa fa-user"></i>
+            Business
+        </div>
+        <div class="options">
+            <zone name="admin_button_toolbar_before" />
 
-        <zone name="admin_button_toolbar_after" />
+            <zone name="admin_button_toolbar_after" />
+        </div>
     </div>
-</div>
+</form>
 
 @{
     var gridViewData = new ViewDataDictionary(this.ViewData);

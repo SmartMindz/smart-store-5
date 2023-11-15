@@ -8,11 +8,14 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <OutputType>Library</OutputType>
+        <BaseOutputPath>D:\BizSol Projects\smart-\src\Smartstore.Web\Modules\BizsolTech.Chatbot</BaseOutputPath>
     </PropertyGroup>
 
     <ItemGroup>
+      <Content Remove="Views\Business\Grids\_Grid.Business.cshtml" />
       <Content Remove="Views\Business\List.cshtml" />
       <Content Remove="Views\Business\_Grid.Business.cshtml" />
+      <Content Remove="Views\_ViewImports.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
@@ -20,14 +23,24 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="MiniProfiler.AspNetCore" Version="4.0.0" />
+      <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.0.0" />
+      <PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.0.0" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Smartstore.Web\Smartstore.Web.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Views\Business\Grids\_Grid.Business.cshtml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="Views\Business\List.cshtml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="Views\Business\Grids\_Grid.Business.cshtml">
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <None Update="Views\_ViewImports.cshtml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
 

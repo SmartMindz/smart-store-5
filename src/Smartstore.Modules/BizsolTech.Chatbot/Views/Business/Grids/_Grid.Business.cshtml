@@ -1,5 +1,8 @@
-﻿@{
-    var parentModel = ViewData["Parent"] as CustomerListModel;
+﻿@using BizsolTech.Chatbot.Models;
+@model BusinessModel
+
+@{ 
+    var parentModel = ViewData["Parent"] as BusinessListModel;
 }
 
 <datagrid id="customers-grid"
@@ -7,10 +10,10 @@
           allow-row-selection="true"
           allow-column-reordering="true"
           onrowclass="customersGrid_onRowClass">
-    <datasource read="@Url.Action("List")" delete="@Url.Action("CustomerDelete")" />
+    <datasource read="@Url.Action("BusinessList")" delete="@Url.Action("BusinessDelete")" />
     <paging position="Bottom" show-size-chooser="true" />
     <sorting enabled="true" allow-unsort="true" allow-multisort="false">
-        <sort by="CreatedOn" by-entity-member="CreatedOnUtc" descending="true" />
+        <sort by="CreatedOnUtc" by-entity-member="CreatedOnUtc" descending="true" />
     </sorting>
     <toolbar>
         <toolbar-group>
@@ -18,43 +21,43 @@
                 <i class="fa fa-fw fa-filter"></i>
             </button>
         </toolbar-group>
-        <toolbar-group>
+        @*<toolbar-group>
             <a asp-action="Create" class="btn btn-primary btn-flat no-anims mr-auto">
                 <i class="fa fa-plus"></i>
                 <span>@T("Admin.Common.AddNew")...</span>
             </a>
-        </toolbar-group>
+        </toolbar-group>*@
         <zone name="datagrid_toolbar_alpha"></zone>
         <toolbar-group class="omega"></toolbar-group>
         <zone name="datagrid_toolbar_omega"></zone>
-        <toolbar-group>
+        @*<toolbar-group>
             <button datagrid-action="DataGridToolAction.DeleteSelectedRows" type="button" class="btn btn-danger btn-flat">
                 <i class="far fa-trash-can"></i>
                 <span>@T("Admin.Common.Delete.Selected")</span>
             </button>
-        </toolbar-group>
+        </toolbar-group>*@
     </toolbar>
-    <search-panel>
+    @*<search-panel>
         <partial name="Grids/_Grid.Customers.Search" model="parentModel" />
-    </search-panel>
+    </search-panel>*@
     <columns>
         <column for="Id" visible="false" type="string" />
-        <column for="Email" hideable="false">
+        <column for="FBPageId" hideable="false">
             <display-template>
                 <a :href="item.row.EditUrl" class="text-truncate">
                     {{ item.value }}
                 </a>
             </display-template>
         </column>
-        @if (parentModel.UsernamesEnabled)
+        @*@if (parentModel.UsernamesEnabled)
         {
             <column for="Username" />
-        }
+        }*@
 
-        <column for="FullName" />
-        <column for="CustomerRoleNames" sortable="false" />
+        <column for="FBAccessToken" />
+        <column for="FBStatus" sortable="false" />
 
-        @if (parentModel.CompanyEnabled)
+        @*@if (parentModel.CompanyEnabled)
         {
             <column for="Company" />
         }
@@ -65,18 +68,15 @@
         @if (parentModel.ZipPostalCodeEnabled)
         {
             <column for="ZipPostalCode" sortable="false" />
-        }
-        <column for="Active" halign="center" />
-        <column for="CreatedOn" entity-member="CreatedOnUtc" />
-        <column for="LastActivityDate" entity-member="LastActivityDateUtc" />
-
-        <!-- Initially hidden columns -->
-        <column for="IsTaxExempt" halign="center" visible="false" />
-        <column for="LastIpAddress" visible="false" />
-        <column for="CustomerNumber" visible="false" />
-        <column for="DateOfBirth" visible="false" sortable="false" />
-        <column for="Gender" visible="false" />
-        <column for="VatNumber" visible="false" sortable="false" />
+        }*@
+        <column for="FBWebhookVerifyToken" halign="center" />
+        <column for="FBWebhookStatus" halign="center" />
+        <column for="OpenAPIKey" halign="center" />
+        <column for="OpenAPIStatus" halign="center" />
+        <column for="AzureOpenAPIKey" halign="center" />
+        <column for="AzureOpenAPIStatus" halign="center" />
+        <column for="CreatedOnUtc" entity-member="CreatedOnUtc" />
+        <column for="UpdatedOnUtc" entity-member="UpdatedOnUtc" />
     </columns>
 </datagrid>
 
