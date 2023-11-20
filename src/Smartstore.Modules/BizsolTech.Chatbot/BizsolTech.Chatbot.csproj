@@ -12,20 +12,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Content Remove="Views\Business\Edit.cshtml" />
       <Content Remove="Views\Business\Grids\_Grid.Business.cshtml" />
       <Content Remove="Views\Business\List.cshtml" />
+      <Content Remove="Views\Business\_CreateOrUpdate.cshtml" />
       <Content Remove="Views\Business\_Grid.Business.cshtml" />
       <Content Remove="Views\_ViewImports.cshtml" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.8">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="MiniProfiler.AspNetCore" Version="4.0.0" />
-      <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.0.0" />
-      <PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.0.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -33,15 +25,36 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Update="Views\Business\Edit.cshtml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="Views\Business\Grids\_Grid.Business.cshtml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="Views\Business\List.cshtml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Views\Business\_CreateOrUpdate.cshtml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="Views\_ViewImports.cshtml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Migrations\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.12">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.11" />
+      <PackageReference Include="MiniProfiler.AspNetCore" Version="4.3.8" />
+      <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.3.8" />
+      <PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.3.8" />
     </ItemGroup>
 
 </Project>

@@ -1,0 +1,28 @@
+﻿@using BizsolTech.Chatbot.Models;
+@model BusinessModel
+
+@{
+    ViewBag.Title = "Business Edit";
+    Layout = "_AdminLayout";
+    Assets.BodyAttributes.AppendCssClass("spa-layout");
+}
+
+<form method="post" asp-action="Edit" id="business-form">
+    <div class="section-header">
+        <div class="title">
+            <a sm-backto asp-action="List"></a>
+            <i class="far fa-user-edit"></i>
+            <span> Edit business details - @Model.FBPageId</span>
+        </div>
+        <div class="options">
+            <zone name="admin_button_toolbar_before" />
+            <button type="submit" name="save" value="save" class="btn btn-warning">
+                <i class="fa fa-check"></i>
+                <span>@T("Admin.Common.Save")</span>
+            </button>
+            <zone name="admin_button_toolbar_after" />
+        </div>
+    </div>
+
+    <partial name="_CreateOrUpdate" model="Model" />
+</form>
