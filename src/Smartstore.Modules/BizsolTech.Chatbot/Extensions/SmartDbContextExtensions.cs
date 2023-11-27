@@ -12,5 +12,7 @@ namespace BizsolTech.Chatbot.Extensions
             => db.Set<BusinessChatEntity>();
         public static DbSet<BusinessFactEntity> BusinessFacts(this SmartDbContext db)
             => db.Set<BusinessFactEntity>();
+        public static DbSet<BusinessDocumentEntity> BusinessDocuments(this SmartDbContext db)
+            => db.Set<BusinessDocumentEntity>();
     }
 }

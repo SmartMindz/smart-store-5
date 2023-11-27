@@ -3,7 +3,7 @@ using Smartstore.Domain;
 
 namespace BizsolTech.Chatbot.Domain
 {
-    [Table("BusinessFacts")]
+    [Table("BusinessFact")]
     public class BusinessFactEntity : BaseEntity, IAuditable
     {
         public int BusinessPageId { get; set; }

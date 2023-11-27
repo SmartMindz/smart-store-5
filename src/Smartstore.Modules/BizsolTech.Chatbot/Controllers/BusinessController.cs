@@ -60,31 +60,38 @@ namespace BizsolTech.Chatbot.Controllers
         [HttpPost]
         public async Task<IActionResult> BusinessList(GridCommand command, BusinessListModel model)
         {
-            var businessList = await _businessService.GetAllAsync();
-
-            var rows = businessList.Select(b => new BusinessModel
+            try
             {
-                AdminId = b.AdminId,
-                FBPageId = b.FBPageId,
-                FBAccessToken = b.FBAccessToken,
-                FBStatus = b.FBStatus,
-                FBWebhookVerifyToken = b.FBWebhookVerifyToken,
-                FBWebhookStatus = b.FBWebhookStatus,
-                OpenAPIKey = b.OpenAPIKey,
-                OpenAPIStatus = b.OpenAPIStatus,
-                AzureOpenAPIKey = b.AzureOpenAPIKey,
-                AzureOpenAPIStatus = b.AzureOpenAPIStatus,
-                IsActive = b.IsActive,
-                CreatedOnUtc = b.CreatedOnUtc,
-                UpdatedOnUtc = b.UpdatedOnUtc,
-                EditUrl = Url.Action(nameof(Edit), "Business", new { id = b.Id }),
-            }).ToList();
+                var businessList = await _businessService.GetAllAsync();
 
-            return Ok(new GridModel<BusinessModel>
+                var rows = businessList.Select(b => new BusinessModel
+                {
+                    AdminId = b.AdminId,
+                    FBPageId = b.FBPageId,
+                    FBAccessToken = b.FBAccessToken,
+                    FBStatus = b.FBStatus,
+                    FBWebhookVerifyToken = b.FBWebhookVerifyToken,
+                    FBWebhookStatus = b.FBWebhookStatus,
+                    OpenAPIKey = b.OpenAPIKey,
+                    OpenAPIStatus = b.OpenAPIStatus,
+                    AzureOpenAPIKey = b.AzureOpenAPIKey,
+                    AzureOpenAPIStatus = b.AzureOpenAPIStatus,
+                    IsActive = b.IsActive,
+                    CreatedOnUtc = b.CreatedOnUtc,
+                    UpdatedOnUtc = b.UpdatedOnUtc,
+                    EditUrl = Url.Action(nameof(Edit), "Business", new { id = b.Id }),
+                }).ToList();
+
+                return Ok(new GridModel<BusinessModel>
+                {
+                    Rows = rows,
+                    Total = businessList.Count
+                });
+            } catch(Exception e)
             {
-                Rows = rows,
-                Total = businessList.Count
-            });
+                NotifyError(e.Message);
+                return BadRequest();
+            }
         }
 
         public async Task<IActionResult> Edit(int id)

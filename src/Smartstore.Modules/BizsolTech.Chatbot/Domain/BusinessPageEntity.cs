@@ -4,7 +4,7 @@ using Smartstore.Domain;
 
 namespace BizsolTech.Chatbot.Domain
 {
-    [Table("BusinessPages")]
+    [Table("BusinessPage")]
     public class BusinessPageEntity : BaseEntity, IAuditable,IActivatable
     {
         public int AdminId { get; set; }
@@ -20,5 +20,8 @@ namespace BizsolTech.Chatbot.Domain
         public bool IsActive { get; set; }
         public DateTime CreatedOnUtc { get; set; }
         public DateTime UpdatedOnUtc { get; set; }
+        public string? WelcomeMessage { get; set; }
+        public string? Description { get; set; }
+        public required string Instruction { get; set; }
     }
 }

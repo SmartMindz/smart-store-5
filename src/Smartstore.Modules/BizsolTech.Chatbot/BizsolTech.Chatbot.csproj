@@ -1,5 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
-
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+    
     <PropertyGroup>
         <Product>BizsolTech Chatbot</Product>
         <OutputPath>..\..\Smartstore.Web\Modules\BizsolTech.Chatbot</OutputPath>
@@ -10,6 +10,12 @@
         <OutputType>Library</OutputType>
         <BaseOutputPath>D:\BizSol Projects\smart-\src\Smartstore.Web\Modules\BizsolTech.Chatbot</BaseOutputPath>
     </PropertyGroup>
+    
+    <ItemGroup>
+      <Compile Remove="Migrations\**" />
+      <EmbeddedResource Remove="Migrations\**" />
+      <None Remove="Migrations\**" />
+    </ItemGroup>
 
     <ItemGroup>
       <Content Remove="Views\Business\Edit.cshtml" />
@@ -40,10 +46,6 @@
       <None Update="Views\_ViewImports.cshtml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Migrations\" />
     </ItemGroup>
 
     <ItemGroup>
