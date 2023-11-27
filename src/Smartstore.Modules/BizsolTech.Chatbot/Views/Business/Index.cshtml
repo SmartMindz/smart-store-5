@@ -1,0 +1,12 @@
+﻿@using BizsolTech.Chatbot.Models;
+@model BusinessModel
+
+@{
+    ViewBag.Title = "Business";
+    Layout = "_AdminLayout";
+}
+
+<widget target-zone="admin_content_before">
+    <partial name="ChatStep" model="new ChatStepModel { ChatProgressStep = ChatProgressStep.Initial }" />
+</widget>
+<partial name="_ChatInput" model="new ChatInputModel {}" />

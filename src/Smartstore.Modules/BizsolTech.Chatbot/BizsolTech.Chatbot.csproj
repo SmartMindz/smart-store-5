@@ -20,9 +20,12 @@
     <ItemGroup>
       <Content Remove="Views\Business\Edit.cshtml" />
       <Content Remove="Views\Business\Grids\_Grid.Business.cshtml" />
+      <Content Remove="Views\Business\Index.cshtml" />
       <Content Remove="Views\Business\List.cshtml" />
+      <Content Remove="Views\Business\Partials\_ChatInput.cshtml" />
       <Content Remove="Views\Business\_CreateOrUpdate.cshtml" />
       <Content Remove="Views\Business\_Grid.Business.cshtml" />
+      <Content Remove="Views\Shared\ChatStep.cshtml" />
       <Content Remove="Views\_ViewImports.cshtml" />
     </ItemGroup>
 
@@ -37,11 +40,20 @@
       <None Update="Views\Business\Grids\_Grid.Business.cshtml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Views\Business\Index.cshtml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="Views\Business\List.cshtml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Views\Business\Partials\_ChatInput.cshtml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="Views\Business\_CreateOrUpdate.cshtml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Views\Shared\ChatStep.cshtml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="Views\_ViewImports.cshtml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>

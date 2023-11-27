@@ -1,0 +1,69 @@
+﻿@using BizsolTech.Chatbot.Models;
+
+@model ChatStepModel
+
+@{
+    var progresses = new List<dynamic>
+    {
+        // Initial
+        new
+        {
+            Step = ChatProgressStep.Initial,
+            StepName = "initial",
+            Label =  "Welcome",
+            Visited = Model.ChatProgressStep > ChatProgressStep.Initial,
+            Active = Model.ChatProgressStep == ChatProgressStep.Initial,
+            Href = Url.RouteUrl("ShoppingCart")
+        },
+        // Connection
+        new
+        {
+            Step = ChatProgressStep.Connection,
+            StepName = "connection",
+            Label =  "Connect",
+            Visited = Model.ChatProgressStep > ChatProgressStep.Connection,
+            Active = Model.ChatProgressStep == ChatProgressStep.Connection,
+            Href = Url.Action("BillingAddress")
+        },
+        // Response
+        new
+        {
+            Step = ChatProgressStep.Response,
+            StepName = "response",
+            Label =  "Response",
+            Visited = Model.ChatProgressStep > ChatProgressStep.Response,
+            Active = Model.ChatProgressStep == ChatProgressStep.Response,
+            Href = Url.Action("ShippingMethod")
+        }
+    };
+}
+
+<zone name="checkout_steps_before" />
+
+<div class="costeps row g-0 mx-auto">
+    @foreach (var p in progresses)
+    {
+        string stateClass = null;
+        string href = p.Visited || p.Active ? p.Href : "javascript:void(0)";
+        if (p.Visited)
+        {
+            stateClass = "visited";
+        }
+        else if (p.Active)
+        {
+            stateClass = "active";
+        }
+        else
+        {
+            stateClass = "inactive";
+        }
+        <div class="col-2 costep @stateClass" data-step="@p.StepName">
+            <a class="costep-link" href="@href">
+                <i class="costep-icon"></i>
+                <span class="costep-label">@p.Label</span>
+            </a>
+        </div>
+    }
+</div>
+
+<zone name="checkout_steps_after" />

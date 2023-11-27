@@ -49,7 +49,8 @@ namespace BizsolTech.Chatbot.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return RedirectToAction(nameof(List));
+            var model = new BusinessModel();
+            return View(model);
         }
         [HttpGet]
         public IActionResult List()

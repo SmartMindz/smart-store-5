@@ -1,0 +1,59 @@
+﻿@using BizsolTech.Chatbot.Models;
+@model ChatInputModel
+
+<form method="post" asp-action="ChatInput" id="chat-input-form">
+    <div class="admin-content">
+        <div class="row">
+            <div class="adminTitle col-md-3">
+                <smart-label asp-for="WelcomeMessage" />
+            </div>
+            <div class="adminData col-md-9">
+                <input asp-for="WelcomeMessage" />
+                <span asp-validation-for="WelcomeMessage"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="adminTitle col-md-3">
+                <smart-label asp-for="BusinessDescription" />
+            </div>
+            <div class="adminData  col-md-9">
+                <input asp-for="BusinessDescription" />
+                <span asp-validation-for="BusinessDescription"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="adminTitle col-md-3">
+                <smart-label asp-for="Instructions" />
+            </div>
+            <div class="adminData col-md-9">
+                <input asp-for="Instructions" />
+                <span asp-validation-for="Instructions"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="adminTitle col-md-3">
+                <smart-label asp-for="Documents" />
+            </div>
+            <div class="adminData col-md-9">
+                <input asp-for="Documents" />
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminData wide">
+                @Html.EditorFor(model => model.Documents, new
+                {
+                entityId = Model.Id,
+                entityType = "Product",
+                transientUpload = false,
+                album = "catalog",
+                multifile = true,
+                deleteUrl = Url.Action("ProductPictureDelete", "Product", "Admin"),
+                sortUrl = Url.Action("SortPictures", "Product", "Admin"),
+                entityAssignmentUrl = Url.Action("ProductMediaFilesAdd", "Product", "Admin"),
+                typeFilter = "image,video"
+                })
+                <span asp-validation-for="Documents"></span>
+            </div>
+        </div>
+    </div>
+</form>
