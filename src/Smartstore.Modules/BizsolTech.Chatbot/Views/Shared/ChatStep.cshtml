@@ -13,7 +13,7 @@
             Label =  "Welcome",
             Visited = Model.ChatProgressStep > ChatProgressStep.Initial,
             Active = Model.ChatProgressStep == ChatProgressStep.Initial,
-            Href = Url.RouteUrl("ShoppingCart")
+            Href = Url.Action("Index")
         },
         // Connection
         new
@@ -23,7 +23,7 @@
             Label =  "Connect",
             Visited = Model.ChatProgressStep > ChatProgressStep.Connection,
             Active = Model.ChatProgressStep == ChatProgressStep.Connection,
-            Href = Url.Action("BillingAddress")
+            Href = Url.Action("ChatConnection")
         },
         // Response
         new
@@ -33,7 +33,7 @@
             Label =  "Response",
             Visited = Model.ChatProgressStep > ChatProgressStep.Response,
             Active = Model.ChatProgressStep == ChatProgressStep.Response,
-            Href = Url.Action("ShippingMethod")
+            Href = Url.Action("ChatResponse")
         }
     };
 }

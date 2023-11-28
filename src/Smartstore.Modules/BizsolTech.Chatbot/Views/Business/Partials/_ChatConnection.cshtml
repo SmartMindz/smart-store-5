@@ -1,0 +1,53 @@
+﻿@using BizsolTech.Chatbot.Models;
+@model ChatConnectionModel
+
+@{
+    Layout = "_Layout";
+}
+
+<style>
+    .row {
+        margin-bottom: 10px;
+    }
+</style>
+
+<widget target-zone="teaser">
+    <partial name="ChatStep" model="new ChatStepModel { ChatProgressStep = ChatProgressStep.Connection }" />
+</widget>
+
+<form method="post" asp-action="ChatConnection" id="chat-connection-form">
+    <div class="admin-content">
+        <div class="row">
+            <div class="adminTitle col-md-3">
+                <smart-label asp-for="OpenAIApiKey" />
+            </div>
+            <div class="adminData col-md-9">
+                <input asp-for="OpenAIApiKey" />
+                <span asp-validation-for="OpenAIApiKey"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="adminTitle col-md-3">
+                <smart-label asp-for="AzureOpenAIKey" />
+            </div>
+            <div class="adminData col-md-9">
+                <input asp-for="AzureOpenAIKey" />
+                <span asp-validation-for="AzureOpenAIKey"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="adminTitle col-md-3">
+                <smart-label asp-for="KeyStatus" />
+            </div>
+            <div class="adminData col-md-9">
+                <input asp-for="KeyStatus" />
+                <span asp-validation-for="KeyStatus"></span>
+            </div>
+        </div>
+        <div class="row" style="justify-content:end">
+            <div class="col-md-2">
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
+        </div>
+    </div>
+</form>

@@ -3,6 +3,8 @@ using BizsolTech.Chatbot.Models;
 using BizsolTech.Chatbot.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Smartstore;
 using Smartstore.Core.Data;
 using Smartstore.Core.Security;
 using Smartstore.Web.Controllers;
@@ -52,6 +54,57 @@ namespace BizsolTech.Chatbot.Controllers
             var model = new BusinessModel();
             return View(model);
         }
+
+        [HttpGet]
+        public IActionResult ChatInput()
+        {
+            var model = new ChatInputModel();
+            return PartialView("_ChatInput", model);
+        }
+        [HttpPost]
+        public IActionResult ChatInput(ChatInputModel model,IFormCollection form)
+        {
+            model.WelcomeMessage = form["WelcomeMessage"];
+            model.Instructions = form["Instructions"];
+            model.BusinessDescription = form["BusinessDescription"];
+            if (model.Instructions.HasValue())
+            {
+                return RedirectToAction(nameof(ChatConnection));
+            }
+            else
+            {
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ChatConnection()
+        {
+            var model = new ChatConnectionModel();
+            return PartialView("_ChatConnection", model);
+        }
+        [HttpPost]
+        public IActionResult ChatConnection(ChatConnectionModel model, IFormCollection form)
+        {
+            model.AzureOpenAIKey = form["AzureOpenAIKey"];
+            model.OpenAIApiKey = form["OpenAIApiKey"];
+            if(model.AzureOpenAIKey.HasValue() || model.OpenAIApiKey.HasValue())
+            {
+                return RedirectToAction(nameof(ChatResponse));
+            }
+            else
+            {
+                return RedirectToAction(nameof(ChatConnection));
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ChatResponse()
+        {
+            var model = new ChatResponseModel();
+            return PartialView("_ChatResponse", model);
+        }
+
         [HttpGet]
         public IActionResult List()
         {

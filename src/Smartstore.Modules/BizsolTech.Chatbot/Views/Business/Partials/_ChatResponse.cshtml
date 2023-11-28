@@ -1,0 +1,44 @@
+﻿@using BizsolTech.Chatbot.Models;
+@model ChatResponseModel
+
+@{
+    Layout = "_Layout";
+}
+
+<style>
+    .row {
+        margin-bottom: 10px;
+    }
+</style>
+
+<widget target-zone="teaser">
+    <partial name="ChatStep" model="new ChatStepModel { ChatProgressStep = ChatProgressStep.Response }" />
+</widget>
+
+<form method="post" asp-action="ChatResponse" id="chat-response-form">
+    <div class="admin-content">
+        <div class="row">
+            <div class="adminTitle col-md-3">
+                <smart-label asp-for="FacebookPageId" />
+            </div>
+            <div class="adminData col-md-9">
+                <input asp-for="FacebookPageId" />
+                <span asp-validation-for="FacebookPageId"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="adminTitle col-md-3">
+                <smart-label asp-for="Response" />
+            </div>
+            <div class="adminData col-md-9">
+                <input asp-for="Response" />
+                <span asp-validation-for="Response"></span>
+            </div>
+        </div>
+        <div class="row" style="justify-content:end">
+            <div class="col-md-2">
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
+        </div>
+    </div>
+</form>

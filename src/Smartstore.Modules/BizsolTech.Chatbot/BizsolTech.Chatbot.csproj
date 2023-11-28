@@ -22,7 +22,9 @@
       <Content Remove="Views\Business\Grids\_Grid.Business.cshtml" />
       <Content Remove="Views\Business\Index.cshtml" />
       <Content Remove="Views\Business\List.cshtml" />
+      <Content Remove="Views\Business\Partials\_ChatConnection.cshtml" />
       <Content Remove="Views\Business\Partials\_ChatInput.cshtml" />
+      <Content Remove="Views\Business\Partials\_ChatResponse.cshtml" />
       <Content Remove="Views\Business\_CreateOrUpdate.cshtml" />
       <Content Remove="Views\Business\_Grid.Business.cshtml" />
       <Content Remove="Views\Shared\ChatStep.cshtml" />
@@ -46,7 +48,13 @@
       <None Update="Views\Business\List.cshtml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Views\Business\Partials\_ChatConnection.cshtml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="Views\Business\Partials\_ChatInput.cshtml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Views\Business\Partials\_ChatResponse.cshtml">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="Views\Business\_CreateOrUpdate.cshtml">
