@@ -3,10 +3,11 @@
 
 @{
     ViewBag.Title = "Business";
-    Layout = "_Layout";
+    Layout = "~/modules/BizsolTech.Chatbot/Views/Shared/Layout/_LayoutMain.cshtml";
 }
 
-<widget target-zone="teaser">
+<widget target-zone="admin_content_before">
+    @*{teaser} -> admin zone*@
     <partial name="ChatStep" model="new ChatStepModel { ChatProgressStep = ChatProgressStep.Initial }" />
 </widget>
 <partial name="_ChatInput" model="new ChatInputModel {}" />

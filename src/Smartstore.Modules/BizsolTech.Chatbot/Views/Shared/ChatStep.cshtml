@@ -38,8 +38,6 @@
     };
 }
 
-<zone name="checkout_steps_before" />
-
 <div class="costeps row g-0 mx-auto">
     @foreach (var p in progresses)
     {
@@ -57,7 +55,8 @@
         {
             stateClass = "inactive";
         }
-        <div class="col-2 costep @stateClass" data-step="@p.StepName">
+        <div class="col-2 costep @stateClass" data-step="complete"> @*to show tick icon*@
+            @*data-step="@p.StepName">*@
             <a class="costep-link" href="@href">
                 <i class="costep-icon"></i>
                 <span class="costep-label">@p.Label</span>
@@ -66,4 +65,22 @@
     }
 </div>
 
-<zone name="checkout_steps_after" />
+<style>
+    .costeps {
+        --costep-ring-width: 10px;
+        position: relative;
+        margin: 1rem auto;
+        padding-bottom: 2rem;
+        max-width: 720px;
+        display: flex; /* Use flexbox */
+        flex-wrap: nowrap;
+        justify-content: center; /* Align content horizontally to center */
+        width: 100%; /* Occupy full width */
+    }
+
+    /* Remove margin-inline from mx-auto */
+    .g-0.mx-auto {
+        margin: 0; /* Override margin set by mx-auto */
+    }
+
+</style>

@@ -1,4 +1,5 @@
-﻿using Smartstore.Web.Modelling;
+﻿using System.ComponentModel.DataAnnotations;
+using Smartstore.Web.Modelling;
 
 namespace BizsolTech.Chatbot.Models
 {
@@ -10,7 +11,10 @@ namespace BizsolTech.Chatbot.Models
         public string? BusinessDescription { get; set; }
         [LocalizedDisplay("Chatbot.Fields.Instructions")]
         public string? Instructions { get; set; }
+
+        [UIHint("Media"), AdditionalMetadata("album", "catalog"), AdditionalMetadata("typeFilter", "image,video")]
         [LocalizedDisplay("Chatbot.Fields.Documents")]
-        public IFormFileCollection? Documents { get; set; }
+        public int DocumentId { get; set; }
+        public List<IFormFile> Documents { get; set; } = new List<IFormFile>();
     }
 }

@@ -1,4 +1,5 @@
-﻿@using BizsolTech.Chatbot.Models;
+﻿@using Microsoft.AspNetCore.Http;
+@using BizsolTech.Chatbot.Models;
 @model ChatInputModel
 
 <style>
@@ -36,35 +37,32 @@
                 <span asp-validation-for="Instructions"></span>
             </div>
         </div>
-        <div class="row">
-            <div class="adminTitle col-md-3">
-                <smart-label asp-for="Documents" />
-            </div>
-            <div class="adminData col-md-9">
-                <input asp-for="Documents" />
+        <div class="adminRow">
+            <div class="admin-config-group">
+                <div class="head">Documents</div>
             </div>
         </div>
-        <div class="row" style="justify-content:end">
-            <div class="col-md-2">
-                <button class="btn btn-primary" type="submit">Submit</button>
-            </div>
-        </div>
-       @*  <div class="adminRow">
+        <div class="adminRow">
             <div class="adminData wide">
-                @Html.EditorFor(model => model.Documents, new
+                @Html.EditorFor(model => model.DocumentId, new
                 {
                 entityId = Model.Id,
-                entityType = "Product",
+                entityType = "ChatInput",
                 transientUpload = false,
-                album = "catalog",
+                album = "chat",
                 multifile = true,
-                deleteUrl = Url.Action("ProductPictureDelete", "Product", "Admin"),
-                sortUrl = Url.Action("SortPictures", "Product", "Admin"),
-                entityAssignmentUrl = Url.Action("ProductMediaFilesAdd", "Product", "Admin"),
+                deleteUrl = Url.Action("ChatInputDocumentDelete", "Business"),
+                entityAssignmentUrl = Url.Action("ChatInputDocumentsAdd", "Business"),
+                uploadedFiles = Model.Documents as IEnumerable<IFormFile>,
                 typeFilter = "image,video"
                 })
-                <span asp-validation-for="Documents"></span>
+                <span asp-validation-for="DocumentId"></span>
             </div>
-        </div> *@
+        </div>
+        <div class="row" style="justify-content: flex-end;">
+            <div class="col-md-2" style="text-align: right;">
+                <button id="btn-next" class="btn btn-primary" type="submit">Next</button>
+            </div>
+        </div>
     </div>
 </form>

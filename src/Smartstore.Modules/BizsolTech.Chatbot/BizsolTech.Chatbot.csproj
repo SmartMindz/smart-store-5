@@ -28,6 +28,8 @@
       <Content Remove="Views\Business\_CreateOrUpdate.cshtml" />
       <Content Remove="Views\Business\_Grid.Business.cshtml" />
       <Content Remove="Views\Shared\ChatStep.cshtml" />
+      <Content Remove="Views\Shared\Layout\_LayoutMain.cshtml" />
+      <Content Remove="Views\Shared\Layout\_LayoutRoot.cshtml" />
       <Content Remove="Views\_ViewImports.cshtml" />
     </ItemGroup>
 
@@ -61,6 +63,12 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="Views\Shared\ChatStep.cshtml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Views\Shared\Layout\_LayoutMain.cshtml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Views\Shared\Layout\_LayoutRoot.cshtml">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="Views\_ViewImports.cshtml">

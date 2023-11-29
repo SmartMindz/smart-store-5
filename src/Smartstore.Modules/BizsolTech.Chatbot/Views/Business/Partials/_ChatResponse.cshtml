@@ -2,7 +2,7 @@
 @model ChatResponseModel
 
 @{
-    Layout = "_Layout";
+    Layout = "~/modules/BizsolTech.Chatbot/Views/Shared/Layout/_LayoutMain.cshtml";
 }
 
 <style>
@@ -11,12 +11,16 @@
     }
 </style>
 
-<widget target-zone="teaser">
+<widget target-zone="admin_content_before">
     <partial name="ChatStep" model="new ChatStepModel { ChatProgressStep = ChatProgressStep.Response }" />
 </widget>
 
 <form method="post" asp-action="ChatResponse" id="chat-response-form">
     <div class="admin-content">
+        <div class="row" style="justify-content: flex-end;">
+            <div class="col-md-3" id="key-status-div" style="display:none;">
+            </div>
+        </div>
         <div class="row">
             <div class="adminTitle col-md-3">
                 <smart-label asp-for="FacebookPageId" />
@@ -35,10 +39,14 @@
                 <span asp-validation-for="Response"></span>
             </div>
         </div>
-        <div class="row" style="justify-content:end">
-            <div class="col-md-2">
-                <button class="btn btn-primary" type="submit">Submit</button>
+        <div class="row" style="justify-content: flex-end;">
+            <div class="col-md-2" style="text-align: right;">
+                <button id="btn-next" class="btn btn-primary" type="submit" style="display:none">Next</button>
             </div>
         </div>
     </div>
 </form>
+
+<script>
+
+</script>

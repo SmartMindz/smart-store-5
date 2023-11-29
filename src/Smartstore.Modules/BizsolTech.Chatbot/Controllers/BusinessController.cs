@@ -1,10 +1,13 @@
-﻿using BizsolTech.Chatbot.Domain;
+﻿using System.Net;
+using BizsolTech.Chatbot.Domain;
 using BizsolTech.Chatbot.Models;
 using BizsolTech.Chatbot.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Smartstore;
+using Smartstore.Core.Catalog.Products;
+using Smartstore.Core.Content.Media;
 using Smartstore.Core.Data;
 using Smartstore.Core.Security;
 using Smartstore.Web.Controllers;
@@ -77,6 +80,36 @@ namespace BizsolTech.Chatbot.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> ChatInputDocumentDelete(int id)
+        {
+            var pages = await _businessService.GetAllAsync();
+            NotifySuccess("Document is deleted.");
+            return StatusCode((int)HttpStatusCode.OK);
+        }
+
+        [HttpPost]
+        [Permission(Permissions.Catalog.Product.EditPicture)]
+        public async Task<IActionResult> ChatInputDocumentsAdd(string mediaFileIds, int entityId)
+        {
+            var ids = mediaFileIds
+                .ToIntArray()
+                .Distinct()
+                .ToArray();
+
+            if (ids.Length == 0)
+            {
+                throw new ArgumentException("Missing document identifiers.");
+            }
+
+            return Json(new
+            {
+                success = true,
+                response = "Document uploaded.",
+                message = T("Admin.Product.Picture.Added").JsValue.ToString()
+            });
+        }
+
         [HttpGet]
         public IActionResult ChatConnection()
         {
@@ -96,6 +129,14 @@ namespace BizsolTech.Chatbot.Controllers
             {
                 return RedirectToAction(nameof(ChatConnection));
             }
+        }
+
+        [HttpPost]
+        public IActionResult TestConnection(IFormCollection form)
+        {
+            var OpenAIApiKey = form["OpenAIApiKey"];
+            var AzureOpenAIKey = form["AzureOpenAIKey"];
+            return Json(new { success = true });
         }
 
         [HttpGet]
