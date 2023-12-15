@@ -2,7 +2,7 @@
 @model ChatConnectionModel
 
 @{
-    Layout = "~/modules/BizsolTech.Chatbot/Views/Shared/Layout/_LayoutMain.cshtml";
+    Layout = "_Layout";
 }
 
 <style>
@@ -11,7 +11,7 @@
     }
 </style>
 
-<widget target-zone="admin_content_before">
+<widget target-zone="teaser">
     <partial name="ChatStep" model="new ChatStepModel { ChatProgressStep = ChatProgressStep.Connection }" />
 </widget>
 
@@ -61,6 +61,11 @@
     });
 
     function testConnection() {
+
+        $.throbber.show({
+            message: "Building connection..."
+        });
+
         var formData = $("#chat-connection-form").serialize();
         debugger
         $.ajax({
@@ -69,17 +74,22 @@
             data: formData,
             success: function (response) {
                 if (response.success) {
+
+                    $.throbber.hide();
+
                     testButton.hide();
 
                     statusDiv.html("<span style='color: green' title='Success'>Connected</span>");
                     nextButton.show();
                 } else {
+                    $.throbber.hide();
                     statusDiv.html("<span style='color: red' title='Failed'>Failed</span>");
                 }
                 statusDiv.css("text-align", "right");
                 statusDiv.show();
             },
             error: function (xhr, status, error) {
+                $.throbber.hide();
                 console.error(xhr.responseText);
             }
         });

@@ -10,6 +10,7 @@ namespace Smartstore.Web.Infrastructure
         {
             var lib = "/lib/";
             var js = "/js/";
+            var components = "/components/";
 
             /* Modernizr + jQuery --> /bundle/js/jquery.js
             -----------------------------------------------------*/
@@ -42,6 +43,15 @@ namespace Smartstore.Web.Infrastructure
                 lib + "photoswipe/photoswipe.js",
                 lib + "photoswipe/photoswipe-ui-default.js",
                 js + "smartstore.gallery.js"));
+
+
+            /* DataGrid --> /bundle/js/datagrid.js
+            -----------------------------------------------------*/
+            bundles.Add(new ScriptBundle("/bundle/js/datagrid.js").Include(
+                lib + "jquery/jquery.deserialize.js",
+                components + "datagrid/datagrid.js",
+                components + "datagrid/datagrid-pager.js",
+                components + "datagrid/datagrid-tools.js"));
         }
     }
 }

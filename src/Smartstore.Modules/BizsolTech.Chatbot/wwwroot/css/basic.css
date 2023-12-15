@@ -1,0 +1,84 @@
+/*
+ * The MIT License
+ * Copyright (c) 2012 Matias Meno <m@tias.me>
+ */
+.dropzone,
+.dropzone * {
+    box-sizing: border-box;
+}
+
+.dropzone {
+    position: relative;
+    /* Added dotted border with a blue shade */
+    min-height: 150px;
+    border: 2px dotted #3498db; /* Change the color code to your preferred blue shade */
+    background: white;
+    padding: 20px 20px;
+}
+
+    /* Customized the message design */
+    .dropzone .dz-message {
+        text-align: center;
+        margin: 2em 0;
+        font-size: 18px; /* Adjust font size */
+        color: #3498db; /* Change the color to your preference */
+        font-weight: bold; /* Make the text bold */
+    }
+
+    /* Custom design for image preview */
+    .dropzone .dz-preview {
+        position: relative;
+        display: inline-block;
+        width: 120px;
+        margin: 0.5em;
+        /* Custom styles for the preview container */
+        border-radius: 10px; /* Rounded corners */
+        background: #f9f9f9; /* Change the background color */
+        border: 2px solid #3498db; /* Border color */
+        padding: 10px; /* Adjust padding */
+    }
+
+        .dropzone .dz-preview .dz-progress {
+            display: block;
+            height: 15px;
+            border: 1px solid #aaa;
+        }
+
+            .dropzone .dz-preview .dz-progress .dz-upload {
+                display: block;
+                height: 100%;
+                width: 0;
+                background: green;
+            }
+
+        .dropzone .dz-preview .dz-error-message {
+            color: red;
+            display: none;
+        }
+
+        .dropzone .dz-preview.dz-error .dz-error-message,
+        .dropzone .dz-preview.dz-error .dz-error-mark {
+            display: block;
+        }
+
+        .dropzone .dz-preview.dz-success .dz-success-mark {
+            display: block;
+        }
+
+        .dropzone .dz-preview .dz-error-mark,
+        .dropzone .dz-preview .dz-success-mark {
+            position: absolute;
+            display: none;
+            left: 30px;
+            top: 30px;
+            width: 54px;
+            height: 58px;
+            left: 50%;
+            margin-left: -27px;
+        }
+
+        /* Adjust the hover effect for the preview */
+        .dropzone .dz-preview:hover {
+            border-color: #2980b9; /* Change border color on hover */
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Add a shadow on hover */
+        }

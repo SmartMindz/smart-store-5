@@ -5,6 +5,7 @@ using BizsolTech.Chatbot.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Newtonsoft.Json.Linq;
 using Smartstore;
 using Smartstore.Core.Catalog.Products;
 using Smartstore.Core.Content.Media;
@@ -16,14 +17,23 @@ using Smartstore.Web.Models.DataGrid;
 
 namespace BizsolTech.Chatbot.Controllers
 {
-    [Route("[area]/Business/{action=index}/{id?}")]
-    public class BusinessController : AdminController
+    public class BusinessController : ModuleController
     {
+        private readonly SmartDbContext _db;
         private readonly IBusinessService _businessService;
+        private readonly IMediaService _mediaService;
+        private readonly IMediaTypeResolver _mediaTypeResolver;
+        private readonly MediaSettings _mediaSettings;
+        private readonly MediaExceptionFactory _exceptionFactory;
 
-        public BusinessController(IBusinessService businessService)
+        public BusinessController(SmartDbContext dbContext, IBusinessService businessService, IMediaService mediaService, IMediaTypeResolver mediaTypeResolver, MediaSettings mediaSettings, MediaExceptionFactory mediaExceptionFactory)
         {
-            this._businessService = businessService;
+            _db = dbContext;
+            _businessService = businessService;
+            _mediaService = mediaService;
+            _mediaTypeResolver = mediaTypeResolver;
+            _mediaSettings = mediaSettings;
+            _exceptionFactory = mediaExceptionFactory;
         }
 
         #region Utilities
@@ -64,8 +74,9 @@ namespace BizsolTech.Chatbot.Controllers
             var model = new ChatInputModel();
             return PartialView("_ChatInput", model);
         }
+
         [HttpPost]
-        public IActionResult ChatInput(ChatInputModel model,IFormCollection form)
+        public IActionResult ChatInput(ChatInputModel model, IFormCollection form)
         {
             model.WelcomeMessage = form["WelcomeMessage"];
             model.Instructions = form["Instructions"];
@@ -81,33 +92,16 @@ namespace BizsolTech.Chatbot.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ChatInputDocumentDelete(int id)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadChatDocument(ChatInputModel model, IFormCollection form)
         {
-            var pages = await _businessService.GetAllAsync();
-            NotifySuccess("Document is deleted.");
-            return StatusCode((int)HttpStatusCode.OK);
-        }
-
-        [HttpPost]
-        [Permission(Permissions.Catalog.Product.EditPicture)]
-        public async Task<IActionResult> ChatInputDocumentsAdd(string mediaFileIds, int entityId)
-        {
-            var ids = mediaFileIds
-                .ToIntArray()
-                .Distinct()
-                .ToArray();
-
-            if (ids.Length == 0)
+            var numFiles = Request.Form.Files.Count;
+            for (var i = 0; i < numFiles; ++i)
             {
-                throw new ArgumentException("Missing document identifiers.");
+                using var stream = Request.Form.Files[i].OpenReadStream();
             }
-
-            return Json(new
-            {
-                success = true,
-                response = "Document uploaded.",
-                message = T("Admin.Product.Picture.Added").JsValue.ToString()
-            });
+            string redirectUrl = Url.Action(nameof(ChatConnection));
+            return Json(new {success = true, redirectUrl = redirectUrl});
         }
 
         [HttpGet]
@@ -116,12 +110,13 @@ namespace BizsolTech.Chatbot.Controllers
             var model = new ChatConnectionModel();
             return PartialView("_ChatConnection", model);
         }
+
         [HttpPost]
         public IActionResult ChatConnection(ChatConnectionModel model, IFormCollection form)
         {
             model.AzureOpenAIKey = form["AzureOpenAIKey"];
             model.OpenAIApiKey = form["OpenAIApiKey"];
-            if(model.AzureOpenAIKey.HasValue() || model.OpenAIApiKey.HasValue())
+            if (model.AzureOpenAIKey.HasValue() || model.OpenAIApiKey.HasValue())
             {
                 return RedirectToAction(nameof(ChatResponse));
             }
@@ -152,6 +147,7 @@ namespace BizsolTech.Chatbot.Controllers
             var model = new BusinessListModel();
             return View(model);
         }
+
         [HttpPost]
         public async Task<IActionResult> BusinessList(GridCommand command, BusinessListModel model)
         {
@@ -182,7 +178,8 @@ namespace BizsolTech.Chatbot.Controllers
                     Rows = rows,
                     Total = businessList.Count
                 });
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 NotifyError(e.Message);
                 return BadRequest();
@@ -231,7 +228,7 @@ namespace BizsolTech.Chatbot.Controllers
                     business.AzureOpenAPIKey = model.AzureOpenAPIKey;
                     business.AzureOpenAPIStatus = model.AzureOpenAPIStatus;
                     business.IsActive = model.IsActive;
-                    business.CreatedOnUtc   = model.CreatedOnUtc;
+                    business.CreatedOnUtc = model.CreatedOnUtc;
                     business.UpdatedOnUtc = DateTime.UtcNow;
 
                     await _businessService.Update(business);

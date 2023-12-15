@@ -1,14 +1,28 @@
 ﻿@using Microsoft.AspNetCore.Http;
 @using BizsolTech.Chatbot.Models;
+@using Smartstore.Core.Content.Media;
 @model ChatInputModel
+
 
 <style>
     .row {
         margin-bottom: 10px;
     }
+
+    .dropzone {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
 </style>
 
-<form method="post" asp-action="ChatInput" id="chat-input-form">
+<widget target-zone="stylesheets">
+    <link rel="stylesheet" href="@Url.Content("~/modules/BizsolTech.Chatbot/css/dropzone.min.css")" />
+</widget>
+<widget target-zone="head_scripts">
+    <script src="@Url.Content("~/modules/BizsolTech.Chatbot/js/dropzone.min.js")"></script>
+</widget>
+
+<form method="post" id="chat-input-form" enctype="multipart/form-data">
     <div class="admin-content">
         <div class="row">
             <div class="adminTitle col-md-3">
@@ -42,22 +56,30 @@
                 <div class="head">Documents</div>
             </div>
         </div>
-        <div class="adminRow">
-            <div class="adminData wide">
-                @Html.EditorFor(model => model.DocumentId, new
-                {
-                entityId = Model.Id,
-                entityType = "ChatInput",
-                transientUpload = false,
-                album = "chat",
-                multifile = true,
-                deleteUrl = Url.Action("ChatInputDocumentDelete", "Business"),
-                entityAssignmentUrl = Url.Action("ChatInputDocumentsAdd", "Business"),
-                uploadedFiles = Model.Documents as IEnumerable<IFormFile>,
-                typeFilter = "image,video"
-                })
-                <span asp-validation-for="DocumentId"></span>
-            </div>
+        @* <div class="adminRow">
+        <div class="fu-container">
+        <div class="dropzone-container">
+        <div class="fu-thumb"></div>
+
+        <file-uploader entity-id="@Model.Id"
+        entity-type="ChatInput"
+        media-path="catalog"
+        upload-url="@Url.Action("UploadChatDocument", "Business")"
+        sort-url="@Url.Action("SortChatDocuments", "Business")"
+        file-uploader-name="chatfileuploader"
+        entity-assigment-url="@Url.Action(" ChatInputDocumentsAdd", "Business")"
+        has-template-preview="true"
+        multi-file="true"
+        onuploadcompleted="document_onUploadCompleted" />
+        </div>
+        <div class="fu-progress">
+        <div class="progress">
+        <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        </div>
+        </div>
+        </div> *@
+        <div class="dropzone" id="document-input" action="@Url.Action("UploadChatDocument", "Business")">
         </div>
         <div class="row" style="justify-content: flex-end;">
             <div class="col-md-2" style="text-align: right;">
@@ -66,3 +88,83 @@
         </div>
     </div>
 </form>
+
+<script sm-target-zone="scripts" data-origin="_ChatInput">
+    Dropzone.autoDiscover = false; //prevent from auto binding to dz
+    $(document).ready(function () {
+        var dz = null;
+        $("#document-input").dropzone({
+            autoProcessQueue: false,
+            paramName: "documentfiles",
+            maxFilesize: 5, //mb
+            maxThumbnailFilesize: 1, //mb
+            maxFiles: 5,
+            parallelUploads: 5,
+            uploadMultiple: true,
+            addRemoveLinks: true,
+            init: function () {
+                dz = this;
+
+                // var nextButton = document.getElementById("btn-next");
+                // nextButton.addEventListener("click", function (e) {
+                //     e.preventDefault();
+                //     e.stopPropagation();
+                //     dz.processQueue(); // Process the Dropzone queue
+                // });
+            },
+            success: function (file) {
+                var preview = $(file.previewElement);
+                preview.addClass("dz-success text-success");
+                setTimeout(function () {
+                    dz.removeFile(file);
+                }, 2000);
+            },
+            queuecomplete: function () {
+            },
+            dictDefaultMessage: "You can drag and drop your files here or Click",
+            dictRemoveFile: "Remove"
+        });
+
+        $(document).on("submit", "#chat-input-form", function (e) {
+            e.preventDefault();
+
+            $.throbber.show({
+                message: "Uploading documents and data..."
+            });
+
+            var formData = new FormData($(this)[0]);
+
+            var files = dz.getAcceptedFiles();
+
+            // Append files to FormData
+            for (var i = 0; i < files.length; i++) {
+                formData.append("files", files[i]);
+            }
+
+            // Make AJAX request to submit form data including files
+            $.ajax({
+                url: '@Url.Action("UploadChatDocument", "Business")',
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success === true) {
+                        dz.removeAllFiles(true); //remove the queue files
+
+                        $.throbber.hide();
+
+                        window.location.href = response.redirectUrl;
+                        console.log("Upload successful", response);
+                    } else {
+                        $.throbber.hide();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $.throbber.hide();
+                    console.error("Upload failed", error);
+                }
+            });
+        });
+    });
+</script>
