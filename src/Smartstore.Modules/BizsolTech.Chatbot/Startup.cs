@@ -1,5 +1,4 @@
-﻿using BizsolTech.Chatbot.Filters;
-using BizsolTech.Chatbot.Services;
+﻿using BizsolTech.Chatbot.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol.Plugins;
@@ -24,6 +23,7 @@ namespace BizsolTech.Chatbot
             {
                 services.AddTransient<IDbContextConfigurationSource<SmartDbContext>, SmartDbContextConfigurer>();
                 services.AddScoped<IBusinessService, BusinessService>();
+                services.AddScoped<IS3StorageService, S3StorageService>();
 
                 services.AddMiniProfiler(o =>
                 {

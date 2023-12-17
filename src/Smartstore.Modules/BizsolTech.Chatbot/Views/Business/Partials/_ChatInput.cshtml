@@ -24,67 +24,72 @@
 
 <form method="post" id="chat-input-form" enctype="multipart/form-data">
     <div class="admin-content">
-        <div class="row">
-            <div class="adminTitle col-md-3">
-                <smart-label asp-for="WelcomeMessage" />
+        <div class="col col-md-6">
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="WelcomeMessage" />
+                </div>
+                <div class="adminData col-md-9">
+                    <input asp-for="WelcomeMessage" placeholder="Message" />
+                    <span asp-validation-for="WelcomeMessage"></span>
+                </div>
             </div>
-            <div class="adminData col-md-9">
-                <input asp-for="WelcomeMessage" />
-                <span asp-validation-for="WelcomeMessage"></span>
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="BusinessDescription" />
+                </div>
+                <div class="adminData  col-md-9">
+                    <textarea asp-for="BusinessDescription" rows="3" placeholder="Please describe your business"></textarea>
+                    <span asp-validation-for="BusinessDescription"></span>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="adminTitle col-md-3">
-                <smart-label asp-for="BusinessDescription" />
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="Instructions" />
+                </div>
+                <div class="adminData col-md-9">
+                    <textarea asp-for="Instructions" rows="3" placeholder="Please provide instructions"></textarea>
+                    <span asp-validation-for="Instructions"></span>
+                </div>
             </div>
-            <div class="adminData  col-md-9">
-                <input asp-for="BusinessDescription" />
-                <span asp-validation-for="BusinessDescription"></span>
+            <div class="adminRow">
+                <div class="admin-config-group">
+                    <div class="head">Documents</div>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="adminTitle col-md-3">
-                <smart-label asp-for="Instructions" />
-            </div>
-            <div class="adminData col-md-9">
-                <input asp-for="Instructions" />
-                <span asp-validation-for="Instructions"></span>
-            </div>
-        </div>
-        <div class="adminRow">
-            <div class="admin-config-group">
-                <div class="head">Documents</div>
-            </div>
-        </div>
-        @* <div class="adminRow">
-        <div class="fu-container">
-        <div class="dropzone-container">
-        <div class="fu-thumb"></div>
+            @* <div class="adminRow">
+            <div class="fu-container">
+            <div class="dropzone-container">
+            <div class="fu-thumb"></div>
 
-        <file-uploader entity-id="@Model.Id"
-        entity-type="ChatInput"
-        media-path="catalog"
-        upload-url="@Url.Action("UploadChatDocument", "Business")"
-        sort-url="@Url.Action("SortChatDocuments", "Business")"
-        file-uploader-name="chatfileuploader"
-        entity-assigment-url="@Url.Action(" ChatInputDocumentsAdd", "Business")"
-        has-template-preview="true"
-        multi-file="true"
-        onuploadcompleted="document_onUploadCompleted" />
-        </div>
-        <div class="fu-progress">
-        <div class="progress">
-        <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuemin="0" aria-valuemax="100"></div>
-        </div>
-        </div>
-        </div>
-        </div> *@
-        <div class="dropzone" id="document-input" action="@Url.Action("UploadChatDocument", "Business")">
-        </div>
-        <div class="row" style="justify-content: flex-end;">
-            <div class="col-md-2" style="text-align: right;">
-                <button id="btn-next" class="btn btn-primary" type="submit">Next</button>
+            <file-uploader entity-id="@Model.Id"
+            entity-type="ChatInput"
+            media-path="catalog"
+            upload-url="@Url.Action("UploadChatDocument", "Business")"
+            sort-url="@Url.Action("SortChatDocuments", "Business")"
+            file-uploader-name="chatfileuploader"
+            entity-assigment-url="@Url.Action(" ChatInputDocumentsAdd", "Business")"
+            has-template-preview="true"
+            multi-file="true"
+            onuploadcompleted="document_onUploadCompleted" />
             </div>
+            <div class="fu-progress">
+            <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            </div>
+            </div>
+            </div> *@
+            <div class="dropzone" id="document-input" action="@Url.Action("UploadChatDocument", "Business")">
+            </div>
+            <div class="row" style="justify-content: flex-end;">
+                <div class="col-md-2" style="text-align: right;">
+                    <button id="btn-next" class="btn btn-primary" type="submit">Next</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+
         </div>
     </div>
 </form>

@@ -19,6 +19,8 @@
     "MiniProfiler.AspNetCore",
     "MiniProfiler.Shared",
     "MiniProfiler.AspNetCore.Mvc",
-    "MiniProfiler.EntityFrameworkCore"
+    "MiniProfiler.EntityFrameworkCore",
+    "AWSSDK.Core",
+    "AWSSDK.S3"
   ]
 }

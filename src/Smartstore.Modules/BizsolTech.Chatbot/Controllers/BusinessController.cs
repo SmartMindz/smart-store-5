@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using BizsolTech.Chatbot.Configuration;
 using BizsolTech.Chatbot.Domain;
 using BizsolTech.Chatbot.Models;
 using BizsolTech.Chatbot.Services;
@@ -7,16 +8,19 @@ using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json.Linq;
 using Smartstore;
+using Smartstore.ComponentModel;
 using Smartstore.Core.Catalog.Products;
 using Smartstore.Core.Content.Media;
 using Smartstore.Core.Data;
 using Smartstore.Core.Security;
 using Smartstore.Web.Controllers;
 using Smartstore.Web.Modelling;
+using Smartstore.Web.Modelling.Settings;
 using Smartstore.Web.Models.DataGrid;
 
 namespace BizsolTech.Chatbot.Controllers
 {
+    [Area("Admin")]
     public class BusinessController : ModuleController
     {
         private readonly SmartDbContext _db;
@@ -57,6 +61,34 @@ namespace BizsolTech.Chatbot.Controllers
                 model.CreatedOnUtc = entity.CreatedOnUtc;
                 model.UpdatedOnUtc = entity.UpdatedOnUtc;
             }
+        }
+
+        #endregion
+
+        #region Configuration
+
+        [LoadSetting, AuthorizeAdmin]
+        public IActionResult Configure(ChatbotSettings settings)
+        {
+            var model = MiniMapper.Map<ChatbotSettings, ConfigurationModel>(settings);
+
+            return View(model);
+        }
+
+        [HttpPost, SaveSetting, AuthorizeAdmin]
+        public IActionResult Configure(ConfigurationModel model, ChatbotSettings settings)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Configure(settings);
+            }
+
+            ModelState.Clear();
+            MiniMapper.Map(model, settings);
+
+            NotifySuccess(T("Admin.Common.DataSuccessfullySaved"));
+
+            return RedirectToAction(nameof(Configure));
         }
 
         #endregion
