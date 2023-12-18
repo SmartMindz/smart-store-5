@@ -17,27 +17,32 @@ using Smartstore.Web.Controllers;
 using Smartstore.Web.Modelling;
 using Smartstore.Web.Modelling.Settings;
 using Smartstore.Web.Models.DataGrid;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BizsolTech.Chatbot.Controllers
 {
-    [Area("Admin")]
     public class BusinessController : ModuleController
     {
         private readonly SmartDbContext _db;
         private readonly IBusinessService _businessService;
+        private readonly IBusinessDocumentService _businessDocumentService;
         private readonly IMediaService _mediaService;
         private readonly IMediaTypeResolver _mediaTypeResolver;
         private readonly MediaSettings _mediaSettings;
         private readonly MediaExceptionFactory _exceptionFactory;
 
-        public BusinessController(SmartDbContext dbContext, IBusinessService businessService, IMediaService mediaService, IMediaTypeResolver mediaTypeResolver, MediaSettings mediaSettings, MediaExceptionFactory mediaExceptionFactory)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public BusinessController(SmartDbContext dbContext, IBusinessService businessService, IBusinessDocumentService businessDocumentService, IMediaService mediaService, IMediaTypeResolver mediaTypeResolver, MediaSettings mediaSettings, MediaExceptionFactory mediaExceptionFactory, IHttpContextAccessor httpContextAccessor)
         {
             _db = dbContext;
             _businessService = businessService;
+            _businessDocumentService = businessDocumentService;
             _mediaService = mediaService;
             _mediaTypeResolver = mediaTypeResolver;
             _mediaSettings = mediaSettings;
             _exceptionFactory = mediaExceptionFactory;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         #region Utilities
@@ -66,7 +71,7 @@ namespace BizsolTech.Chatbot.Controllers
         #endregion
 
         #region Configuration
-
+        [Area("Admin")]
         [LoadSetting, AuthorizeAdmin]
         public IActionResult Configure(ChatbotSettings settings)
         {
@@ -74,7 +79,7 @@ namespace BizsolTech.Chatbot.Controllers
 
             return View(model);
         }
-
+        [Area("Admin")]
         [HttpPost, SaveSetting, AuthorizeAdmin]
         public IActionResult Configure(ConfigurationModel model, ChatbotSettings settings)
         {
@@ -97,65 +102,106 @@ namespace BizsolTech.Chatbot.Controllers
         public IActionResult Index()
         {
             var model = new BusinessModel();
-            return View(model);
+
+            var session = _httpContextAccessor.HttpContext?.Session;
+
+            if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
+            {
+                return View(inputModel);
+            }
+            else
+            {
+                return View(model);
+            }
         }
 
         [HttpGet]
         public IActionResult ChatInput()
         {
-            var model = new ChatInputModel();
-            return PartialView("_ChatInput", model);
-        }
+            var model = new BusinessModel();
+            var session = _httpContextAccessor.HttpContext?.Session;
 
-        [HttpPost]
-        public IActionResult ChatInput(ChatInputModel model, IFormCollection form)
-        {
-            model.WelcomeMessage = form["WelcomeMessage"];
-            model.Instructions = form["Instructions"];
-            model.BusinessDescription = form["BusinessDescription"];
-            if (model.Instructions.HasValue())
+            if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
             {
-                return RedirectToAction(nameof(ChatConnection));
+                return PartialView("_ChatInput", inputModel);
             }
             else
             {
-                return RedirectToAction(nameof(Index));
+                return PartialView("_ChatInput", model);
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadChatDocument(ChatInputModel model, IFormCollection form)
+        public async Task<IActionResult> ChatInput(BusinessModel model, IFormCollection form)
         {
             var numFiles = Request.Form.Files.Count;
-            for (var i = 0; i < numFiles; ++i)
+            try
             {
-                using var stream = Request.Form.Files[i].OpenReadStream();
+                if (ModelState.IsValid && numFiles > 0)
+                {
+                    //var businessPage = new BusinessPageEntity
+                    //{
+                    //    WelcomeMessage = model.WelcomeMessage,
+                    //    Instruction = model.Instruction ?? "ins",
+                    //    Description = model.Description
+                    //};
+                    //await _businessService.Insert(businessPage);
+
+                    //for (var i = 0; i < numFiles; ++i)
+                    //{
+                    //    using var stream = Request.Form.Files[i].OpenReadStream();
+
+                    //    var fileName = Request.Form.Files[i].FileName;
+                    //    var extension = Path.GetExtension(fileName);
+                    //    var fileSize = stream.Length;
+                    //    var document = new BusinessDocumentEntity
+                    //    {
+                    //        BusinessPageId = businessPage.Id,
+                    //        Name = fileName,
+                    //        Size = int.Parse(fileSize.ToString()),
+                    //        FileUrl = "fileURL",
+                    //        Extension = extension,
+                    //        CRC = "CRC",
+                    //        OpenAIFileID = "OPENAIFILEID"
+                    //    };
+
+                    //    await _businessDocumentService.Insert(document);
+                    //    model.Documents.Add(document);
+                    //}
+
+                    //var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
+
+                    string redirectUrl = Url.Action(nameof(ChatConnection));
+                    return Json(new { success = true, redirectUrl = redirectUrl });
+                }
+                else
+                {
+                    return Json(new { success = false, redirectUrl = Url.Action(nameof(ChatInput)) });
+                }
             }
-            string redirectUrl = Url.Action(nameof(ChatConnection));
-            return Json(new {success = true, redirectUrl = redirectUrl});
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpGet]
         public IActionResult ChatConnection()
         {
-            var model = new ChatConnectionModel();
-            return PartialView("_ChatConnection", model);
-        }
+            var session = _httpContextAccessor.HttpContext?.Session;
 
-        [HttpPost]
-        public IActionResult ChatConnection(ChatConnectionModel model, IFormCollection form)
-        {
-            model.AzureOpenAIKey = form["AzureOpenAIKey"];
-            model.OpenAIApiKey = form["OpenAIApiKey"];
-            if (model.AzureOpenAIKey.HasValue() || model.OpenAIApiKey.HasValue())
+            if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
             {
-                return RedirectToAction(nameof(ChatResponse));
+                return PartialView("_ChatConnection", inputModel);
             }
             else
             {
-                return RedirectToAction(nameof(ChatConnection));
+                NotifyError("Input data from session is missing!");
+                return PartialView("_ChatConnection", new BusinessModel());
             }
+
         }
 
         [HttpPost]
@@ -169,8 +215,17 @@ namespace BizsolTech.Chatbot.Controllers
         [HttpGet]
         public IActionResult ChatResponse()
         {
-            var model = new ChatResponseModel();
-            return PartialView("_ChatResponse", model);
+            var model = new BusinessModel();
+            var session = _httpContextAccessor.HttpContext?.Session;
+
+            if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
+            {
+                return PartialView("_ChatResponse", inputModel);
+            }
+            else
+            {
+                return PartialView("_ChatResponse", model);
+            }
         }
 
         [HttpGet]

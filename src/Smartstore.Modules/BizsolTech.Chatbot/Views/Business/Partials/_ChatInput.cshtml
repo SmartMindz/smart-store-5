@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Http;
 @using BizsolTech.Chatbot.Models;
 @using Smartstore.Core.Content.Media;
-@model ChatInputModel
+@model BusinessModel
 
 
 <style>
@@ -36,20 +36,20 @@
             </div>
             <div class="row">
                 <div class="adminTitle col-md-3">
-                    <smart-label asp-for="BusinessDescription" />
+                    <smart-label asp-for="Description" />
                 </div>
                 <div class="adminData  col-md-9">
-                    <textarea asp-for="BusinessDescription" rows="3" placeholder="Please describe your business"></textarea>
-                    <span asp-validation-for="BusinessDescription"></span>
+                    <textarea asp-for="Description" rows="3" placeholder="Please describe your business"></textarea>
+                    <span asp-validation-for="Description"></span>
                 </div>
             </div>
             <div class="row">
                 <div class="adminTitle col-md-3">
-                    <smart-label asp-for="Instructions" />
+                    <smart-label asp-for="Instruction" />
                 </div>
                 <div class="adminData col-md-9">
-                    <textarea asp-for="Instructions" rows="3" placeholder="Please provide instructions"></textarea>
-                    <span asp-validation-for="Instructions"></span>
+                    <textarea asp-for="Instruction" rows="3" placeholder="Please provide instructions"></textarea>
+                    <span asp-validation-for="Instruction"></span>
                 </div>
             </div>
             <div class="adminRow">
@@ -80,7 +80,7 @@
             </div>
             </div>
             </div> *@
-            <div class="dropzone" id="document-input" action="@Url.Action("UploadChatDocument", "Business")">
+            <div class="dropzone" id="document-input" action="@Url.Action("ChatInput", "Business")">
             </div>
             <div class="row" style="justify-content: flex-end;">
                 <div class="col-md-2" style="text-align: right;">
@@ -148,7 +148,7 @@
 
             // Make AJAX request to submit form data including files
             $.ajax({
-                url: '@Url.Action("UploadChatDocument", "Business")',
+                url: '@Url.Action("ChatInput", "Business")',
                 type: "POST",
                 data: formData,
                 processData: false,
