@@ -26,6 +26,7 @@ namespace BizsolTech.Chatbot.Controllers
         private readonly SmartDbContext _db;
         private readonly IBusinessService _businessService;
         private readonly IBusinessDocumentService _businessDocumentService;
+        private readonly IBusinessAPIService _businessAPI;
         private readonly IMediaService _mediaService;
         private readonly IMediaTypeResolver _mediaTypeResolver;
         private readonly MediaSettings _mediaSettings;
@@ -33,11 +34,12 @@ namespace BizsolTech.Chatbot.Controllers
 
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public BusinessController(SmartDbContext dbContext, IBusinessService businessService, IBusinessDocumentService businessDocumentService, IMediaService mediaService, IMediaTypeResolver mediaTypeResolver, MediaSettings mediaSettings, MediaExceptionFactory mediaExceptionFactory, IHttpContextAccessor httpContextAccessor)
+        public BusinessController(SmartDbContext dbContext, IBusinessService businessService, IBusinessDocumentService businessDocumentService, IBusinessAPIService businessAPIService, IMediaService mediaService, IMediaTypeResolver mediaTypeResolver, MediaSettings mediaSettings, MediaExceptionFactory mediaExceptionFactory, IHttpContextAccessor httpContextAccessor)
         {
             _db = dbContext;
             _businessService = businessService;
             _businessDocumentService = businessDocumentService;
+            _businessAPI = businessAPIService;
             _mediaService = mediaService;
             _mediaTypeResolver = mediaTypeResolver;
             _mediaSettings = mediaSettings;
@@ -140,37 +142,38 @@ namespace BizsolTech.Chatbot.Controllers
             {
                 if (ModelState.IsValid && numFiles > 0)
                 {
-                    //var businessPage = new BusinessPageEntity
-                    //{
-                    //    WelcomeMessage = model.WelcomeMessage,
-                    //    Instruction = model.Instruction ?? "ins",
-                    //    Description = model.Description
-                    //};
-                    //await _businessService.Insert(businessPage);
+                    var businessPage = new BusinessPageEntity
+                    {
+                        WelcomeMessage = model.WelcomeMessage,
+                        Instruction = model.Instruction ?? "ins",
+                        Description = model.Description
+                    };
+                    await _businessService.Insert(businessPage);
 
-                    //for (var i = 0; i < numFiles; ++i)
-                    //{
-                    //    using var stream = Request.Form.Files[i].OpenReadStream();
+                    for (var i = 0; i < numFiles; ++i)
+                    {
+                        using var stream = Request.Form.Files[i].OpenReadStream();
 
-                    //    var fileName = Request.Form.Files[i].FileName;
-                    //    var extension = Path.GetExtension(fileName);
-                    //    var fileSize = stream.Length;
-                    //    var document = new BusinessDocumentEntity
-                    //    {
-                    //        BusinessPageId = businessPage.Id,
-                    //        Name = fileName,
-                    //        Size = int.Parse(fileSize.ToString()),
-                    //        FileUrl = "fileURL",
-                    //        Extension = extension,
-                    //        CRC = "CRC",
-                    //        OpenAIFileID = "OPENAIFILEID"
-                    //    };
+                        var fileName = Request.Form.Files[i].FileName;
+                        var extension = Path.GetExtension(fileName);
+                        var fileSize = stream.Length;
+                        var document = new BusinessDocumentEntity
+                        {
+                            BusinessPageId = businessPage.Id,
+                            Name = fileName,
+                            Size = int.Parse(fileSize.ToString()),
+                            FileUrl = "fileURL",
+                            Extension = extension,
+                            CRC = "CRC",
+                            OpenAIFileID = "OPENAIFILEID"
+                        };
 
-                    //    await _businessDocumentService.Insert(document);
-                    //    model.Documents.Add(document);
-                    //}
+                        await _businessDocumentService.Insert(document);
+                        model.Id = businessPage.Id;
+                        model.Documents.Add(document);
+                    }
 
-                    //var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
+                    var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
 
                     string redirectUrl = Url.Action(nameof(ChatConnection));
                     return Json(new { success = true, redirectUrl = redirectUrl });
@@ -205,11 +208,13 @@ namespace BizsolTech.Chatbot.Controllers
         }
 
         [HttpPost]
-        public IActionResult TestConnection(IFormCollection form)
+        public async  Task<IActionResult> TestOpenAIConnection(BusinessModel model,IFormCollection form)
         {
-            var OpenAIApiKey = form["OpenAIApiKey"];
-            var AzureOpenAIKey = form["AzureOpenAIKey"];
-            return Json(new { success = true });
+            var OpenAIApiKey = form["OpenAPIKey"];
+            var AzureOpenAIKey = form["AzureOpenAPIKey"];
+
+            var success = _businessAPI.VerifyOpenAICredentials(model.Id, OpenAIApiKey.ToString());
+            return Json(new { success = success });
         }
 
         [HttpGet]

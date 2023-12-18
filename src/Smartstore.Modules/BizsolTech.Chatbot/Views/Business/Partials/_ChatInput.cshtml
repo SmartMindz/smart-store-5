@@ -12,7 +12,43 @@
     .dropzone {
         margin-top: 10px;
         margin-bottom: 10px;
+        position: relative;
+        /* Added dotted border with a blue shade */
+        min-height: 150px;
+        border: 2px dotted #3498db; /* Change the color */
+        border-radius: 7px;
+        background: white;
+        padding: 20px 20px;
     }
+
+        /* Customized the message design */
+        .dropzone .dz-message {
+            text-align: center;
+            margin: 2em 0;
+            font-size: 16px; /* Adjust font size */
+            color: #3498db; /* Change the color */
+            font-weight: bold; /* Make the text bold */
+        }
+
+        /* Custom design for image preview */
+        .dropzone .dz-preview {
+            position: relative;
+            display: inline-block;
+            width: 150px;
+            margin: 0.5em;
+            /* Custom styles for the preview container */
+            border-radius: 10px; /* Rounded corners */
+            background: #f9f9f9; /* Change the background color */
+            border: 2px solid #3498db; /* Border color */
+            padding: 10px; /* Adjust padding */
+        }
+
+            .dropzone .dz-preview img {
+                max-width: 100%; /* Ensure the image fits within its container */
+                max-height: 100%; /* Ensure the image fits within its container */
+                display: block;
+                margin: 0 auto; /* Center the image horizontally */
+            }
 </style>
 
 <widget target-zone="stylesheets">
