@@ -20,6 +20,7 @@
     <input type="hidden" asp-for="WelcomeMessage" />
     <input type="hidden" asp-for="Description" />
     <input type="hidden" asp-for="Instruction" />
+    <input type="hidden" asp-for="Documents" />
     <div class="admin-content">
         <div class="col col-md-6">
             <div class="row" style="padding-left: 15px;">
@@ -34,7 +35,7 @@
                     <smart-label asp-for="OpenAPIKey" />
                 </div>
                 <div class="adminData col-md-9">
-                    <input class="key" asp-for="OpenAPIKey" />
+                    <input class="key" asp-for="OpenAPIKey" placeholder="OpenAI Key"/>
                     <span asp-validation-for="OpenAPIKey"></span>
                 </div>
             </div>
@@ -50,7 +51,7 @@
                     <smart-label asp-for="AzureOpenAPIKey" />
                 </div>
                 <div class="adminData col-md-9">
-                    <input class="key" asp-for="AzureOpenAPIKey" />
+                    <input class="key" asp-for="AzureOpenAPIKey" placeholder="Azure OpenAI Key"/>
                     <span asp-validation-for="AzureOpenAPIKey"></span>
                 </div>
             </div>

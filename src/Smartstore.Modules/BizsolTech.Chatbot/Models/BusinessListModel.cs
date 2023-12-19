@@ -13,7 +13,9 @@ namespace BizsolTech.Chatbot.Models
             Documents = new List<BusinessDocumentEntity>();
         }
         public int AdminId { get; set; }
+        [LocalizedDisplay("Chatbot.Fields.FBPageId")]
         public long? FBPageId { get; set; }
+        [LocalizedDisplay("Chatbot.Fields.FBAccessToken")]
         public string? FBAccessToken { get; set; }
         public bool FBStatus { get; set; }
         public string? FBWebhookVerifyToken { get; set; }

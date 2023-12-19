@@ -35,6 +35,7 @@ namespace BizsolTech.Chatbot.Services
                 var jsonRequest = JsonConvert.SerializeObject(requestBody);
                 var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
+                businessId = 1; //fixed temporary
                 apiUrl += $"?businessId={businessId}";
 
                 var response = await client.PostAsync(apiUrl, content);
@@ -69,6 +70,7 @@ namespace BizsolTech.Chatbot.Services
                 var jsonRequest = JsonConvert.SerializeObject(requestBody);
                 var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
+                businessId = 1; //fixed temporary
                 apiUrl += $"?businessId={businessId}";
 
                 var response = await client.PostAsync(apiUrl, content);

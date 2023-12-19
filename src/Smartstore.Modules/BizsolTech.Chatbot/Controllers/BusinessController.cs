@@ -210,10 +210,18 @@ namespace BizsolTech.Chatbot.Controllers
         [HttpPost]
         public async  Task<IActionResult> TestOpenAIConnection(BusinessModel model,IFormCollection form)
         {
-            var OpenAIApiKey = form["OpenAPIKey"];
-            var AzureOpenAIKey = form["AzureOpenAPIKey"];
+            var success = await _businessAPI.VerifyOpenAICredentials(model.Id, model.OpenAPIKey);
+            //store params
+            var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
+            return Json(new { success = success });
+        }
 
-            var success = _businessAPI.VerifyOpenAICredentials(model.Id, OpenAIApiKey.ToString());
+        [HttpPost]
+        public async Task<IActionResult> TestFacebookPageConnection(BusinessModel model, IFormCollection form)
+        {
+            var success = await _businessAPI.VerifyFacebookCredentials(model.Id, model.FBPageId.ToString(), model.FBAccessToken);
+            //store params
+            var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
             return Json(new { success = success });
         }
 
