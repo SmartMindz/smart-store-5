@@ -4,12 +4,15 @@ using Amazon.S3;
 using System.IO.Compression;
 using BizsolTech.Chatbot.Configuration;
 using NuGet.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace BizsolTech.Chatbot.Services
 {
     public interface IS3StorageService
     {
         Task<bool> S3FileUpload(string fileKey, string prevFileKey, byte[] byteArray, bool isArchive);
+        Task<string> ReadFileFromS3(string key);
     }
 
     public class S3StorageService : IS3StorageService
@@ -20,6 +23,8 @@ namespace BizsolTech.Chatbot.Services
         {
             _settings = settings;
         }
+
+        public ILogger Logger { get; set; } = NullLogger.Instance;
         public async Task<bool> S3FileUpload(string fileKey, string prevFileKey, byte[] byteArray, bool isArchive)
         {
             try
@@ -60,9 +65,33 @@ namespace BizsolTech.Chatbot.Services
 
                 return true; //indicate that the file was sent
             }
-            catch (Exception e)
+            catch (AmazonS3Exception e)
             {
+                Logger.Error(e);
                 return false;
+            }
+        }
+
+        public async Task<string> ReadFileFromS3(string fileKey)
+        {
+            try {
+                IAmazonS3 client = new AmazonS3Client(_settings.AccessKey, _settings.SecretKey, Amazon.RegionEndpoint.USEast1);
+                var getObjectRequest = new GetObjectRequest
+                {
+                    BucketName = _settings.BucketName,
+                    Key = fileKey
+                };
+
+                using (GetObjectResponse response = await client.GetObjectAsync(getObjectRequest))
+                using (StreamReader reader = new StreamReader(response.ResponseStream))
+                {
+                    string content = await reader.ReadToEndAsync();
+                    return content;
+                }
+            }
+            catch(AmazonS3Exception e) {
+                Logger.Error(e);
+                return e.Message;
             }
         }
     }

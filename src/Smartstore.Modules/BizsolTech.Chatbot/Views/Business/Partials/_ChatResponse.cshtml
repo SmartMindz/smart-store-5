@@ -24,40 +24,45 @@
     <input type="hidden" asp-for="OpenAPIKey" />
     <input type="hidden" asp-for="AzureOpenAPIKey" />
     <div class="admin-content">
-        <div class="row" style="padding-left: 15px;">
-            <a href="@Url.Action("ChatConnection", "Business")" class="btn btn-outline-secondary btn-sm btn-icon mr-3" title="Back to step two"><i class="fa fa-arrow-left"></i></a>
-        </div>
-        <div class="row" style="justify-content: flex-end;">
-            <div class="col-md-3" id="key-status-div" style="display:none;">
+        <div class="col col-md-6">
+            <div class="row" style="padding-left: 15px;">
+                <a href="@Url.Action("ChatConnection", "Business")" class="btn btn-outline-secondary btn-sm btn-icon mr-3" title="Back to step two"><i class="fa fa-arrow-left"></i></a>
+            </div>
+            <div class="row" style="justify-content: flex-end;">
+                <div class="col-md-3" id="key-status-div" style="display:none;">
+                </div>
+            </div>
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="FBPageId" />
+                </div>
+                <div class="adminData col-md-9">
+                    <input class="key" asp-for="FBPageId" placeholder="Facebook page id" />
+                    <span asp-validation-for="FBPageId"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="FBAccessToken" />
+                </div>
+                <div class="adminData col-md-9">
+                    <input class="key" asp-for="FBAccessToken" placeholder="Facebook access token" />
+                    <span asp-validation-for="FBAccessToken"></span>
+                </div>
+            </div>
+            <div class="row" style="justify-content:flex-end;">
+                <div class="col-md-2" style="text-align: right;">
+                    <button id="btn-test" class="btn btn-primary" type="button" style="display:none" onclick="testConnection()">Connection</button>
+                </div>
+            </div>
+            <div class="row" style="justify-content: flex-end;">
+                <div class="col-md-2" style="text-align: right;">
+                    <button id="btn-finish" class="btn btn-primary" type="button" style="display:none">Finish</button>
+                </div>
             </div>
         </div>
-        <div class="row">
-            <div class="adminTitle col-md-3">
-                <smart-label asp-for="FBPageId" />
-            </div>
-            <div class="adminData col-md-9">
-                <input class="key" asp-for="FBPageId" placeholder="Facebook page id"/>
-                <span asp-validation-for="FBPageId"></span>
-            </div>
-        </div>
-        <div class="row">
-            <div class="adminTitle col-md-3">
-                <smart-label asp-for="FBAccessToken" />
-            </div>
-            <div class="adminData col-md-9">
-                <input class="key" asp-for="FBAccessToken" placeholder="Facebook access token"/>
-                <span asp-validation-for="FBAccessToken"></span>
-            </div>
-        </div>
-        <div class="row" style="justify-content:flex-end;">
-            <div class="col-md-2" style="text-align: right;">
-                <button id="btn-test" class="btn btn-primary" type="button" style="display:none" onclick="testConnection()">Connection</button>
-            </div>
-        </div>
-        <div class="row" style="justify-content: flex-end;">
-            <div class="col-md-2" style="text-align: right;">
-                <button id="btn-finish" class="btn btn-primary" type="button" style="display:none">Finish</button>
-            </div>
+        <div class="col col-md-6">
+
         </div>
     </div>
 </form>

@@ -18,6 +18,7 @@ namespace BizsolTech.Chatbot.Domain
         public int? ModifiedBy { get; set; }
         public bool Deleted { get; set; }
         public bool IsActive { get; set; }
+        public bool UpdateRequired { get; set; }
         public DateTime CreatedOnUtc { get; set; }
         public DateTime UpdatedOnUtc { get; set; }
     }

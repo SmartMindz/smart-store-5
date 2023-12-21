@@ -40,7 +40,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Views\Business\Configure.cshtml" />
+      <None Remove="Views\Config\Configure.cshtml" />
     </ItemGroup>
 
     <ItemGroup>

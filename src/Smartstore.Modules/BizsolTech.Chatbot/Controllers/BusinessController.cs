@@ -72,34 +72,6 @@ namespace BizsolTech.Chatbot.Controllers
 
         #endregion
 
-        #region Configuration
-        [Area("Admin")]
-        [LoadSetting, AuthorizeAdmin]
-        public IActionResult Configure(ChatbotSettings settings)
-        {
-            var model = MiniMapper.Map<ChatbotSettings, ConfigurationModel>(settings);
-
-            return View(model);
-        }
-        [Area("Admin")]
-        [HttpPost, SaveSetting, AuthorizeAdmin]
-        public IActionResult Configure(ConfigurationModel model, ChatbotSettings settings)
-        {
-            if (!ModelState.IsValid)
-            {
-                return Configure(settings);
-            }
-
-            ModelState.Clear();
-            MiniMapper.Map(model, settings);
-
-            NotifySuccess(T("Admin.Common.DataSuccessfullySaved"));
-
-            return RedirectToAction(nameof(Configure));
-        }
-
-        #endregion
-
         [HttpGet]
         public IActionResult Index()
         {
