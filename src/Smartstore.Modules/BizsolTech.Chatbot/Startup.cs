@@ -1,5 +1,8 @@
-﻿using BizsolTech.Chatbot.Services;
+﻿using Autofac;
+using BizsolTech.Chatbot.Filters;
+using BizsolTech.Chatbot.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol.Plugins;
 using Smartstore;
@@ -26,6 +29,13 @@ namespace BizsolTech.Chatbot
                 services.AddScoped<IBusinessDocumentService, BusinessDocumentService>();
                 services.AddScoped<IBusinessAPIService, BusinessAPIService>();
                 services.AddScoped<IS3StorageService, S3StorageService>();
+
+                // action filter for RegisterResult
+                services.Configure<MvcOptions>(o =>
+                {
+                    o.Filters.AddConditional<ChatbotRegisterResultFilter>(
+                        context => context.ControllerIs<IdentityController>());
+                });
 
                 services.AddMiniProfiler(o =>
                 {
