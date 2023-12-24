@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using BizsolTech.Chatbot.Configuration;
 using BizsolTech.Chatbot.Domain;
+using BizsolTech.Chatbot.Helpers;
 using BizsolTech.Chatbot.Models;
 using BizsolTech.Chatbot.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -112,7 +113,7 @@ namespace BizsolTech.Chatbot.Controllers
             var numFiles = Request.Form.Files.Count;
             try
             {
-                if (ModelState.IsValid && numFiles > 0)
+                if (ModelState.IsValid)
                 {
                     var businessPage = new BusinessPageEntity
                     {
@@ -124,9 +125,10 @@ namespace BizsolTech.Chatbot.Controllers
 
                     for (var i = 0; i < numFiles; ++i)
                     {
-                        using var stream = Request.Form.Files[i].OpenReadStream();
+                        var file = Request.Form.Files[i];
+                        using var stream = file.OpenReadStream();
 
-                        var fileName = Request.Form.Files[i].FileName;
+                        var fileName = file.FileName;
                         var extension = Path.GetExtension(fileName);
                         var fileSize = stream.Length;
                         var document = new BusinessDocumentEntity
@@ -134,9 +136,10 @@ namespace BizsolTech.Chatbot.Controllers
                             BusinessPageId = businessPage.Id,
                             Name = fileName,
                             Size = int.Parse(fileSize.ToString()),
+                            UpdateRequired = true,
                             FileUrl = "fileURL",
                             Extension = extension,
-                            CRC = "CRC",
+                            CRC = CRC32Calculator.CalculateCRC32FromFile(file).ToString(),
                             OpenAIFileID = "OPENAIFILEID"
                         };
 

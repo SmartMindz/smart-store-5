@@ -9,6 +9,7 @@ namespace BizsolTech.Chatbot.Services
     {
         Task<bool> VerifyFacebookCredentials(int businessId, string pageId, string accessToken);
         Task<bool> VerifyOpenAICredentials(int businessId, string apiKey);
+        Task<bool> AddDocumentContent(int businessId, string content);
     }
 
     public class BusinessAPIService : IBusinessAPIService
@@ -20,6 +21,44 @@ namespace BizsolTech.Chatbot.Services
         {
             _httpClientFactory = httpClientFactory;
         }
+
+        public async Task<bool> AddDocumentContent(int businessId, string documentContent)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                var apiUrl = baseUrl + "/api/Business/AddMemory";
+
+                var requestBody = new
+                {
+                    fact = "fact",
+                    text = documentContent
+                };
+
+                var jsonRequest = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+                businessId = 1; //fixed temporary
+                apiUrl += $"?businessId={businessId}";
+
+                var response = await client.PostAsync(apiUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
         public async Task<bool> VerifyFacebookCredentials(int businessId, string pageId, string accessToken)
         {
             try {
@@ -90,5 +129,7 @@ namespace BizsolTech.Chatbot.Services
                 return false;
             }
         }
+
+
     }
 }

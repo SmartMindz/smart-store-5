@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using BizsolTech.Chatbot.Filters;
 using BizsolTech.Chatbot.Services;
+using BizsolTech.Chatbot.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ using Smartstore.Data;
 using Smartstore.Data.Providers;
 using Smartstore.Engine;
 using Smartstore.Engine.Builders;
+using Smartstore.Scheduling;
 using Smartstore.Web.Controllers;
 using StackExchange.Profiling;
 
@@ -29,6 +31,8 @@ namespace BizsolTech.Chatbot
                 services.AddScoped<IBusinessDocumentService, BusinessDocumentService>();
                 services.AddScoped<IBusinessAPIService, BusinessAPIService>();
                 services.AddScoped<IS3StorageService, S3StorageService>();
+
+                services.AddScoped<ITask, ReadDocumentContentTask>();
 
                 // action filter for RegisterResult
                 services.Configure<MvcOptions>(o =>
@@ -63,6 +67,39 @@ namespace BizsolTech.Chatbot
                 }).AddEntityFramework();
             }
         }
+
+        /*public void ConfigureContainer(ContainerBuilder builder)
+        {
+            // Register services with Autofac
+            builder.RegisterType<SmartDbContextConfigurer>().As<IDbContextConfigurationSource<SmartDbContext>>().InstancePerLifetimeScope();
+            builder.RegisterType<BusinessService>().As<IBusinessService>().InstancePerLifetimeScope();
+            builder.RegisterType<BusinessDocumentService>().As<IBusinessDocumentService>().InstancePerLifetimeScope();
+            builder.RegisterType<BusinessAPIService>().As<IBusinessAPIService>().InstancePerLifetimeScope();
+            builder.RegisterType<S3StorageService>().As<IS3StorageService>().InstancePerLifetimeScope();
+
+            builder.RegisterType<ReadDocumentContentTask>().As<ITask>().InstancePerLifetimeScope();
+
+            // Configure action filter for RegisterResult
+            builder.Register(context =>
+            {
+                var options = new MvcOptions();
+                options.Filters.AddConditional<ChatbotRegisterResultFilter>(
+                    context => context.ControllerIs<IdentityController>());
+                return options;
+            }).SingleInstance();
+
+            // Configure MiniProfiler
+            builder.Register(context =>
+            {
+                var options = new MiniProfilerOptions();
+                options.IgnoredPaths.Clear();
+                options.IgnorePath("/favicon.ico");
+                // Other MiniProfiler configurations here
+                return options;
+            }).SingleInstance()
+            .AsSelf();
+        }*/
+
 
         public override void MapRoutes(EndpointRoutingBuilder builder)
         {
