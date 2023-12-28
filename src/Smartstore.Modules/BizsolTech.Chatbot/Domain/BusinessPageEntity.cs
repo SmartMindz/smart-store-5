@@ -7,6 +7,8 @@ namespace BizsolTech.Chatbot.Domain
     [Table("BusinessPage")]
     public class BusinessPageEntity : BaseEntity, IAuditable,IActivatable
     {
+        public required string BusinessName { get; set; }
+        public string? BusinessId { get; set; } //id from vector db
         public int AdminId { get; set; }
         public long? FBPageId { get; set; }
         public string? FBAccessToken { get; set; }

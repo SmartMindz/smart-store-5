@@ -28,6 +28,7 @@ namespace BizsolTech.Chatbot.Controllers
         private readonly IBusinessService _businessService;
         private readonly IBusinessDocumentService _businessDocumentService;
         private readonly IBusinessAPIService _businessAPI;
+        private readonly IS3StorageService _s3StorageService;
         private readonly IMediaService _mediaService;
         private readonly IMediaTypeResolver _mediaTypeResolver;
         private readonly MediaSettings _mediaSettings;
@@ -35,12 +36,22 @@ namespace BizsolTech.Chatbot.Controllers
 
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public BusinessController(SmartDbContext dbContext, IBusinessService businessService, IBusinessDocumentService businessDocumentService, IBusinessAPIService businessAPIService, IMediaService mediaService, IMediaTypeResolver mediaTypeResolver, MediaSettings mediaSettings, MediaExceptionFactory mediaExceptionFactory, IHttpContextAccessor httpContextAccessor)
+        public BusinessController(SmartDbContext dbContext, 
+            IBusinessService businessService, 
+            IBusinessDocumentService businessDocumentService, 
+            IBusinessAPIService businessAPIService,
+            IS3StorageService s3StorageService,
+            IMediaService mediaService, 
+            IMediaTypeResolver mediaTypeResolver, 
+            MediaSettings mediaSettings, 
+            MediaExceptionFactory mediaExceptionFactory, 
+            IHttpContextAccessor httpContextAccessor)
         {
             _db = dbContext;
             _businessService = businessService;
             _businessDocumentService = businessDocumentService;
             _businessAPI = businessAPIService;
+            _s3StorageService = s3StorageService;
             _mediaService = mediaService;
             _mediaTypeResolver = mediaTypeResolver;
             _mediaSettings = mediaSettings;
@@ -117,20 +128,44 @@ namespace BizsolTech.Chatbot.Controllers
                 {
                     var businessPage = new BusinessPageEntity
                     {
+                        BusinessName = model.BusinessName,
                         WelcomeMessage = model.WelcomeMessage,
                         Instruction = model.Instruction ?? "ins",
                         Description = model.Description
                     };
                     await _businessService.Insert(businessPage);
 
+                    //var response = await _businessAPI.AddBusiness(businessPage);
+                    var response = @"{
+                            ""id"": 5,
+                            ""collectionName"": ""PageUzair"",
+                            ""facebookPageId"": """",
+                            ""facebookAccessToken"": """",
+                            ""facebookAccessTokenStatus"": false,
+                            ""facebookWebhookVerifyToken"": """",
+                            ""facebookWebhookVerifyTokenStatus"": false,
+                            ""openAIApiKey"": """",
+                            ""openAIKeyStatus"": false,
+                            ""textEmbeddingModel"": ""text-embedding-ada-002"",
+                            ""textCompletionModel"": ""gpt-3.5-turbo""
+                        }";
+                    if (string.IsNullOrEmpty(response))
+                    {
+                        throw new Exception($"Server error: Failed to create business. '{model.BusinessName}'");
+                    }
+                    var jsonResponse = JObject.Parse(response);
+                    businessPage.BusinessId = jsonResponse["id"].Value<string>();
+                    await _businessService.Update(businessPage);
+
                     for (var i = 0; i < numFiles; ++i)
                     {
                         var file = Request.Form.Files[i];
                         using var stream = file.OpenReadStream();
 
-                        var fileName = file.FileName;
+                        var fileName = Path.GetFileNameWithoutExtension(file.FileName);
                         var extension = Path.GetExtension(fileName);
                         var fileSize = stream.Length;
+                        var byteArray = stream.ToByteArray();
                         var document = new BusinessDocumentEntity
                         {
                             BusinessPageId = businessPage.Id,
@@ -146,6 +181,7 @@ namespace BizsolTech.Chatbot.Controllers
                         await _businessDocumentService.Insert(document);
                         model.Id = businessPage.Id;
                         model.Documents.Add(document);
+                        var success = await _s3StorageService.AddDocument(document, businessPage.BusinessName, fileName, "prevKey", byteArray, false);
                     }
 
                     var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);

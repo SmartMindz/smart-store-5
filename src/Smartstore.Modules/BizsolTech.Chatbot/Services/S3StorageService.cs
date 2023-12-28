@@ -6,36 +6,69 @@ using BizsolTech.Chatbot.Configuration;
 using NuGet.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using BizsolTech.Chatbot.Domain;
 
 namespace BizsolTech.Chatbot.Services
 {
     public interface IS3StorageService
     {
+        Task<bool> AddDocument(BusinessDocumentEntity businessDocument, string businessName, string fileName, string prevFileKey, byte[] byteArray, bool isArchive);
         Task<bool> S3FileUpload(string fileKey, string prevFileKey, byte[] byteArray, bool isArchive);
         Task<string> ReadFileFromS3(string key);
     }
 
     public class S3StorageService : IS3StorageService
     {
+        private readonly IBusinessDocumentService _documentService;
         private readonly ChatbotSettings _settings;
 
-        public S3StorageService(ChatbotSettings settings)
+        public S3StorageService(IBusinessDocumentService businessDocumentService, ChatbotSettings settings)
         {
+            _documentService = businessDocumentService;
             _settings = settings;
         }
 
         public ILogger Logger { get; set; } = NullLogger.Instance;
+
+        public async Task<bool> AddDocument(BusinessDocumentEntity businessDocument, string businessName, string fileName, string prevKey, byte[] byteArray, bool isArchive)
+        {
+            try {
+                string fileKey = string.Empty;
+                DateTime uploadedDate = DateTime.UtcNow;
+
+                string folderPath = $"{businessName}/{businessDocument.BusinessPageId}/";
+                string fileNameAWS = $"Doc-{fileName}-{uploadedDate.Ticks}";
+                fileKey = folderPath + fileNameAWS;
+
+                var success = await S3FileUpload(fileKey, prevKey, byteArray, isArchive);
+                if (success)
+                {
+                    businessDocument.FileUrl = fileKey;
+                    var isUpdated = await _documentService.Update(businessDocument);
+                    return isUpdated;
+                }
+                return false;
+            }catch(Exception e)
+            {
+                Logger.Error(e);
+                return false;
+            }
+        }
+
         public async Task<bool> S3FileUpload(string fileKey, string prevFileKey, byte[] byteArray, bool isArchive)
         {
             try
             {
-                IAmazonS3 client = new AmazonS3Client(_settings.AccessKey, _settings.SecretKey, Amazon.RegionEndpoint.USEast1);
+                string accessKey = "AKIAUDAYUBV76LWJTAOH";
+                string accessSecret = "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";
+                string bucketName = "bizsolchatdocs";
+                IAmazonS3 client = new AmazonS3Client(accessKey, accessSecret, Amazon.RegionEndpoint.USEast1);
                 TransferUtility utility = new TransferUtility(client);
                 TransferUtilityUploadRequest request = new TransferUtilityUploadRequest();
 
 
                 Stream stream = new MemoryStream(byteArray);
-                request.BucketName = _settings.BucketName;
+                request.BucketName = bucketName;
                 request.Key = fileKey;
                 request.InputStream = stream;
                 utility.Upload(request);
@@ -75,10 +108,14 @@ namespace BizsolTech.Chatbot.Services
         public async Task<string> ReadFileFromS3(string fileKey)
         {
             try {
-                IAmazonS3 client = new AmazonS3Client(_settings.AccessKey, _settings.SecretKey, Amazon.RegionEndpoint.USEast1);
+                string accessKey = "AKIAUDAYUBV76LWJTAOH";
+                string accessSecret = "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";
+                string bucketName = "bizsolchatdocs";
+
+                IAmazonS3 client = new AmazonS3Client(accessKey, accessSecret, Amazon.RegionEndpoint.USEast1);
                 var getObjectRequest = new GetObjectRequest
                 {
-                    BucketName = _settings.BucketName,
+                    BucketName = bucketName,
                     Key = fileKey
                 };
 

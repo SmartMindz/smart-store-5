@@ -29,7 +29,9 @@ namespace BizsolTech.Chatbot.Models
         public bool IsActive { get; set; }
         public DateTime CreatedOnUtc { get; set; }
         public DateTime UpdatedOnUtc { get; set; }
-
+        [LocalizedDisplay("Chatbot.Fields.BusinessName")]
+        public string? BusinessId { get; set; }
+        public string BusinessName { get; set; }
         [LocalizedDisplay("Chatbot.Fields.WelcomeMessage")]
         public string? WelcomeMessage { get; set; }
 

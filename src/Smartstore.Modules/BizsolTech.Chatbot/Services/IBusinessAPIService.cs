@@ -1,7 +1,9 @@
 ﻿using System.Text;
 using Azure.Core;
+using BizsolTech.Chatbot.Domain;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using NUglify.JavaScript;
 
 namespace BizsolTech.Chatbot.Services
 {
@@ -10,6 +12,8 @@ namespace BizsolTech.Chatbot.Services
         Task<bool> VerifyFacebookCredentials(int businessId, string pageId, string accessToken);
         Task<bool> VerifyOpenAICredentials(int businessId, string apiKey);
         Task<bool> AddDocumentContent(int businessId, string content);
+
+        Task<string> AddBusiness(BusinessPageEntity businessPage);
     }
 
     public class BusinessAPIService : IBusinessAPIService
@@ -20,6 +24,39 @@ namespace BizsolTech.Chatbot.Services
         public BusinessAPIService(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
+        }
+
+        public async Task<string> AddBusiness(BusinessPageEntity businessPage)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                var apiUrl = baseUrl + "/api/Business/Insert";
+
+                var requestBody = new
+                {
+                    collectionName = businessPage.BusinessName //required
+                };
+
+                var jsonRequest = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(apiUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    return responseData;
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public async Task<bool> AddDocumentContent(int businessId, string documentContent)
@@ -61,7 +98,8 @@ namespace BizsolTech.Chatbot.Services
 
         public async Task<bool> VerifyFacebookCredentials(int businessId, string pageId, string accessToken)
         {
-            try {
+            try
+            {
                 var client = _httpClientFactory.CreateClient();
                 var apiUrl = baseUrl + "/api/Business/VerifyFacebookCredentials";
 
@@ -89,7 +127,8 @@ namespace BizsolTech.Chatbot.Services
                     return false;
                 }
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 return false;
             }
         }

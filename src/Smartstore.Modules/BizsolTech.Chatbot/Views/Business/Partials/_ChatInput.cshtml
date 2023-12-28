@@ -59,8 +59,18 @@
 </widget>
 
 <form method="post" id="chat-input-form" enctype="multipart/form-data">
+    <input type="hidden" asp-for="BusinessId" />
     <div class="admin-content">
         <div class="col col-md-6">
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="BusinessName" />
+                </div>
+                <div class="adminData col-md-9">
+                    <input asp-for="BusinessName" placeholder="Your business name here" />
+                    <span asp-validation-for="BusinessName"></span>
+                </div>
+            </div>
             <div class="row">
                 <div class="adminTitle col-md-3">
                     <smart-label asp-for="WelcomeMessage" />
