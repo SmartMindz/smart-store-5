@@ -163,7 +163,7 @@ namespace BizsolTech.Chatbot.Controllers
                         using var stream = file.OpenReadStream();
 
                         var fileName = Path.GetFileNameWithoutExtension(file.FileName);
-                        var extension = Path.GetExtension(fileName);
+                        var extension = Path.GetExtension(file.FileName);
                         var fileSize = stream.Length;
                         var byteArray = stream.ToByteArray();
                         var document = new BusinessDocumentEntity

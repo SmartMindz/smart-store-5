@@ -35,7 +35,11 @@ namespace BizsolTech.Chatbot.Services
 
                 var requestBody = new
                 {
-                    collectionName = businessPage.BusinessName //required
+                    collectionName = businessPage.BusinessName, //required
+                    businessName = businessPage.BusinessName,
+                    description = businessPage.Description,
+                    instructions = businessPage.Instruction,
+                    welcomeMessage = businessPage.WelcomeMessage
                 };
 
                 var jsonRequest = JsonConvert.SerializeObject(requestBody);

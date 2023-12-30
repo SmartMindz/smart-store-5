@@ -21,6 +21,9 @@
     "MiniProfiler.AspNetCore.Mvc",
     "MiniProfiler.EntityFrameworkCore",
     "AWSSDK.Core",
-    "AWSSDK.S3"
+    "AWSSDK.S3",
+    "itext7",
+    "itext",
+    "itext.commons"
   ]
 }
