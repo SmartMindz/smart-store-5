@@ -4,6 +4,7 @@ using BizsolTech.Chatbot.Domain;
 using BizsolTech.Chatbot.Helpers;
 using BizsolTech.Chatbot.Models;
 using BizsolTech.Chatbot.Services;
+using BizsolTech.Models.Business;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -124,39 +125,30 @@ namespace BizsolTech.Chatbot.Controllers
             var numFiles = Request.Form.Files.Count;
             try
             {
+                var businessAll = await _businessAPI.GetBusinessAll();
                 if (ModelState.IsValid)
                 {
-                    var businessPage = new BusinessPageEntity
+                    var businessPage = new Business
                     {
                         BusinessName = model.BusinessName,
                         WelcomeMessage = model.WelcomeMessage,
-                        Instruction = model.Instruction ?? "ins",
-                        Description = model.Description
+                        Instruction = model.Instruction,
+                        Description = model.Description,
+                        CollectionName = "Collection_" + model.BusinessName,
                     };
-                    await _businessService.Insert(businessPage);
 
-                    //var response = await _businessAPI.AddBusiness(businessPage);
-                    var response = @"{
-                            ""id"": 5,
-                            ""collectionName"": ""PageUzair"",
-                            ""facebookPageId"": """",
-                            ""facebookAccessToken"": """",
-                            ""facebookAccessTokenStatus"": false,
-                            ""facebookWebhookVerifyToken"": """",
-                            ""facebookWebhookVerifyTokenStatus"": false,
-                            ""openAIApiKey"": """",
-                            ""openAIKeyStatus"": false,
-                            ""textEmbeddingModel"": ""text-embedding-ada-002"",
-                            ""textCompletionModel"": ""gpt-3.5-turbo""
-                        }";
-                    if (string.IsNullOrEmpty(response))
+                    if(businessAll.Any(b => b.BusinessName == model.BusinessName))
+                    {
+                        throw new Exception($"Server error: Business with name '{model.BusinessName}' already exists.");
+                    }
+
+                    var response = await _businessAPI.AddBusiness(businessPage);
+                    if (response == null)
                     {
                         throw new Exception($"Server error: Failed to create business. '{model.BusinessName}'");
                     }
-                    var jsonResponse = JObject.Parse(response);
-                    businessPage.BusinessId = jsonResponse["id"].Value<string>();
-                    await _businessService.Update(businessPage);
 
+                    var businessDocs = await _businessDocumentService.GetAllAsync();
                     for (var i = 0; i < numFiles; ++i)
                     {
                         var file = Request.Form.Files[i];
@@ -166,22 +158,39 @@ namespace BizsolTech.Chatbot.Controllers
                         var extension = Path.GetExtension(file.FileName);
                         var fileSize = stream.Length;
                         var byteArray = stream.ToByteArray();
+
+                        var crc = CRC32Calculator.CalculateCRC32FromFile(file);
                         var document = new BusinessDocumentEntity
                         {
-                            BusinessPageId = businessPage.Id,
+                            BusinessPageId = response.Id,
                             Name = fileName,
                             Size = int.Parse(fileSize.ToString()),
                             UpdateRequired = true,
                             FileUrl = "fileURL",
                             Extension = extension,
-                            CRC = CRC32Calculator.CalculateCRC32FromFile(file).ToString(),
+                            CRC = crc.ToString(),
                             OpenAIFileID = "OPENAIFILEID"
                         };
 
-                        await _businessDocumentService.Insert(document);
-                        model.Id = businessPage.Id;
+                        if(businessDocs.Any(d => d.Name == fileName && d.Extension == extension))
+                        {
+                            var existingFile = businessDocs.FirstOrDefault(d => d.Name == fileName && d.Extension == extension);
+                            var existingCRC = uint.Parse(existingFile?.CRC);
+                            if(crc != existingCRC)
+                            {
+                                existingFile.CRC = crc.ToString();
+                                existingFile.Size = int.Parse(fileSize.ToString());
+                                existingFile.UpdateRequired = true;
+                                await _businessDocumentService.Update(existingFile);
+                            }
+                        }
+                        else
+                        {
+                            await _businessDocumentService.Insert(document);
+                        }
+                        model.Id = response.Id;
                         model.Documents.Add(document);
-                        var success = await _s3StorageService.AddDocument(document, businessPage.BusinessName, fileName, "prevKey", byteArray, false);
+                        var success = await _s3StorageService.AddDocument(document, response.BusinessName, fileName, "prevKey", byteArray, false);
                     }
 
                     var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);

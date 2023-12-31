@@ -1,6 +1,10 @@
 ﻿using System.Text;
 using Azure.Core;
 using BizsolTech.Chatbot.Domain;
+using BizsolTech.Chatbot.Extensions;
+using BizsolTech.Chatbot.Helpers;
+using BizsolTech.Models.Business;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using NUglify.JavaScript;
@@ -13,48 +17,104 @@ namespace BizsolTech.Chatbot.Services
         Task<bool> VerifyOpenAICredentials(int businessId, string apiKey);
         Task<bool> AddDocumentContent(int businessId, string content);
 
-        Task<string> AddBusiness(BusinessPageEntity businessPage);
+        Task<List<Business>> GetBusinessAll();
+        Task<Business> GetBusiness(int businessId);
+        Task<Business> AddBusiness(Business business);
     }
 
     public class BusinessAPIService : IBusinessAPIService
     {
         private const string baseUrl = "https://chatbot.bizsoltech.com";
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly CBApiRequestHandler _apiHandler;
 
         public BusinessAPIService(IHttpClientFactory httpClientFactory)
         {
-            _httpClientFactory = httpClientFactory;
+            _apiHandler = new CBApiRequestHandler(httpClientFactory, baseUrl);
         }
 
-        public async Task<string> AddBusiness(BusinessPageEntity businessPage)
-        {
-            try
-            {
-                var client = _httpClientFactory.CreateClient();
-                var apiUrl = baseUrl + "/api/Business/Insert";
+        public ILogger Logger { get; set; } = NullLogger.Instance;
 
-                var requestBody = new
-                {
-                    collectionName = businessPage.BusinessName, //required
-                    businessName = businessPage.BusinessName,
-                    description = businessPage.Description,
-                    instructions = businessPage.Instruction,
-                    welcomeMessage = businessPage.WelcomeMessage
+        public async Task<Business> GetBusiness(int businessId)
+        {
+            try {
+                var apiUrl = "/api/Business/Get";
+                Dictionary<string, string> parameters = new Dictionary<string, string>() {
+                    { "businessId", $"{businessId}" }
                 };
 
-                var jsonRequest = JsonConvert.SerializeObject(requestBody);
-                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+                var response = await _apiHandler.GetAsync(apiUrl, parameters);
 
-                var response = await client.PostAsync(apiUrl, content);
-
-                if (response.IsSuccessStatusCode)
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    var responseData = await response.Content.ReadAsStringAsync();
-                    return responseData;
+                    var responseData = response.ResponseContent;
+                    Business business = new Business() { BusinessName = ""};
+                    return business.ToModel(responseData);
                 }
                 else
                 {
-                    return string.Empty;
+                    Logger.Error($"GetBusiness: API response:{response.StatusCode}");
+                    return null;
+                }
+            }
+            catch(Exception e) {
+                Logger.Error(e);
+                return null;
+            }
+        }
+
+        public async Task<List<Business>> GetBusinessAll()
+        {
+            try
+            {
+                var apiUrl = "/api/Business/GetAll";
+
+                var response = await _apiHandler.GetAsync(apiUrl);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    var responseData = response.ResponseContent;
+                    List<Business> businessList = JsonConvert.DeserializeObject<List<Business>>(responseData);
+                    return businessList;
+                }
+                else
+                {
+                    Logger.Error($"GetBusinessAll: API response:{response.StatusCode}");
+                    return new List<Business>();
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+                return new List<Business>();
+            }
+        }
+
+        public async Task<Business> AddBusiness(Business business)
+        {
+            try
+            {
+                var apiUrl = "/api/Business/Insert";
+
+                var requestBody = new
+                {
+                    collectionName = business.CollectionName, //required
+                    businessName = business.BusinessName,
+                    description = business.Description,
+                    instructions = business.Instruction,
+                    welcomeMessage = business.WelcomeMessage
+                };
+
+                var response = await _apiHandler.PostAsync(apiUrl, requestBody);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    Business model = new Business() { BusinessName = string.Empty};
+                    return model.ToModel(response.ResponseContent);
+                }
+                else
+                {
+                    Logger.Error($"AddBusiness: API response:{response.StatusCode}");
+                    return null;
                 }
             }
             catch
@@ -67,8 +127,7 @@ namespace BizsolTech.Chatbot.Services
         {
             try
             {
-                var client = _httpClientFactory.CreateClient();
-                var apiUrl = baseUrl + "/api/Business/AddMemory";
+                var apiUrl = "/api/Business/AddMemory";
 
                 var requestBody = new
                 {
@@ -76,26 +135,27 @@ namespace BizsolTech.Chatbot.Services
                     text = documentContent
                 };
 
-                var jsonRequest = JsonConvert.SerializeObject(requestBody);
-                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+                //parameters
+                Dictionary<string, string> parameters = new Dictionary<string, string>() {
+                    { "businessId", $"{businessId}" }
+                };
 
-                businessId = 1; //fixed temporary
-                apiUrl += $"?businessId={businessId}";
+                var response = await _apiHandler.PostAsync(apiUrl, requestBody, parameters);
 
-                var response = await client.PostAsync(apiUrl, content);
-
-                if (response.IsSuccessStatusCode)
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    var responseData = await response.Content.ReadAsStringAsync();
+                    var responseData = response.ResponseContent;
                     return true;
                 }
                 else
                 {
+                    Logger.Error($"AddDocumentContent: API response:{response.StatusCode}");
                     return false;
                 }
             }
             catch (Exception e)
             {
+                Logger.Error(e);
                 return false;
             }
         }
@@ -104,8 +164,7 @@ namespace BizsolTech.Chatbot.Services
         {
             try
             {
-                var client = _httpClientFactory.CreateClient();
-                var apiUrl = baseUrl + "/api/Business/VerifyFacebookCredentials";
+                var apiUrl = "/api/Business/VerifyFacebookCredentials";
 
                 var requestBody = new
                 {
@@ -113,26 +172,27 @@ namespace BizsolTech.Chatbot.Services
                     accessToken = accessToken
                 };
 
-                var jsonRequest = JsonConvert.SerializeObject(requestBody);
-                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+                //parameters
+                Dictionary<string, string> parameters = new Dictionary<string, string>() {
+                    { "businessId", $"{businessId}" }
+                };
 
-                businessId = 1; //fixed temporary
-                apiUrl += $"?businessId={businessId}";
+                var response = await _apiHandler.PostAsync(apiUrl, requestBody, parameters);
 
-                var response = await client.PostAsync(apiUrl, content);
-
-                if (response.IsSuccessStatusCode)
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    var responseData = await response.Content.ReadAsStringAsync();
+                    var responseData = response.ResponseContent;
                     return true;
                 }
                 else
                 {
+                    Logger.Error($"VerifyFacebookCredentials: API response:{response.StatusCode}");
                     return false;
                 }
             }
             catch (Exception e)
             {
+                Logger.Error(e);
                 return false;
             }
         }
@@ -141,34 +201,34 @@ namespace BizsolTech.Chatbot.Services
         {
             try
             {
-                var client = _httpClientFactory.CreateClient();
-                var apiUrl = baseUrl + "/api/Business/VerifyOpenAICredentials";
+                var apiUrl = "/api/Business/VerifyOpenAICredentials";
 
                 var requestBody = new
                 {
                     apiKey = apiKey
                 };
 
-                var jsonRequest = JsonConvert.SerializeObject(requestBody);
-                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+                //parameters
+                Dictionary<string, string> parameters = new Dictionary<string, string>() {
+                    { "businessId", $"{businessId}" }
+                };
 
-                businessId = 1; //fixed temporary
-                apiUrl += $"?businessId={businessId}";
+                var response = await _apiHandler.PostAsync(apiUrl, requestBody, parameters);
 
-                var response = await client.PostAsync(apiUrl, content);
-
-                if (response.IsSuccessStatusCode)
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    var responseData = await response.Content.ReadAsStringAsync();
+                    var responseData = response.ResponseContent;
                     return true;
                 }
                 else
                 {
+                    Logger.Error($"VerifyOpenAICredentials: API response:{response.StatusCode}");
                     return false;
                 }
             }
             catch (Exception e)
             {
+                Logger.Error(e);
                 return false;
             }
         }

@@ -1,5 +1,6 @@
 ﻿using BizsolTech.Chatbot.Helpers;
 using BizsolTech.Chatbot.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 using Smartstore.Scheduling;
 
 namespace BizsolTech.Chatbot.Tasks
@@ -18,23 +19,23 @@ namespace BizsolTech.Chatbot.Tasks
             _s3StorageService = s3StorageService;
             _apiService = businessAPIService;
         }
+
+        public ILogger Logger { get; set; } = NullLogger.Instance;
         public async Task Run(TaskExecutionContext ctx, CancellationToken cancelToken = default)
         {
             var documents = await _businessDocumentService.GetAllAsync();
             documents = documents.Where(x => x.UpdateRequired).ToList();
             foreach (var document in documents)
             {
-                var page = await _businessPageService.Get(document.BusinessPageId);
                 var content = await _s3StorageService.ReadFileFromS3(document.FileUrl);
 
-                var crc32 = CRC32Calculator.CalculateCRC32FromContent(content);
-                if(crc32 != 0 && string.Equals(crc32.ToString(), document.CRC))
+                if(!string.IsNullOrEmpty(content))
                 {
-                    //var success = await _apiService.AddDocumentContent(int.Parse(page.BusinessId), content);
+                    var success = await _apiService.AddDocumentContent(document.BusinessPageId, content);
                 }
                 else
                 {
-                    Console.WriteLine("File from s3 and from db are not matched!");
+                    Logger.Error($"S3Bucket: Read file content error. Doc {document.Name}");
                 }
 
             }
