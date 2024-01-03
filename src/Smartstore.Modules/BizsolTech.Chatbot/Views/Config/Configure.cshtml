@@ -1,0 +1,47 @@
+﻿@using BizsolTech.Chatbot.Models;
+
+@model ConfigurationModel
+
+@{
+    Layout = "_ConfigureModule";
+}
+
+<widget target-zone="admin_button_toolbar_before">
+    <button id="SaveConfigButton" type="submit" name="save" class="btn btn-warning" value="save">
+        <i class="fa fa-check"></i>
+        <span>Save</span>
+    </button>
+</widget>
+
+<form asp-action="Configure">
+
+    <div class="adminContent">
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="BucketName" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="BucketName" />
+                <span asp-validation-for="BucketName"></span>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="AccessKey" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="AccessKey" />
+                <span asp-validation-for="AccessKey"></span>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="SecretKey" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="SecretKey" />
+                <span asp-validation-for="SecretKey"></span>
+            </div>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,24 @@
+{
+  "$schema": "../module.schema.json",
+  "Author": "BizsolTech LLC",
+  "Group": "Social",
+  "SystemName": "BizsolTech.Chatbot",
+  "FriendlyName": "BizsolTech Chatbot",
+  "Description": "Connect your business page with OpenAI",
+  "Version": "5.1.0",
+  "MinAppVersion": "5.1.0",
+  "Order": 1,
+  "ResourceRootKey": "Plugins.SmartStore.Shipping",
+  "PrivateReferences": [
+    "Microsoft.EntityFrameworkCore.Design",
+    "MiniProfiler.AspNetCore",
+    "MiniProfiler.Shared",
+    "MiniProfiler.AspNetCore.Mvc",
+    "MiniProfiler.EntityFrameworkCore",
+    "AWSSDK.Core",
+    "AWSSDK.S3",
+    "itext7",
+    "itext",
+    "itext.commons"
+  ]
+}

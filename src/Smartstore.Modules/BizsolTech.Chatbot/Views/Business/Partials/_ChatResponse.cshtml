@@ -1,0 +1,114 @@
+﻿@using BizsolTech.Chatbot.Models;
+@model BusinessModel
+
+@{
+    Layout = "_Layout";
+}
+
+<style>
+    .row {
+        margin-bottom: 10px;
+    }
+</style>
+
+<widget target-zone="teaser">
+    <partial name="ChatStep" model="new ChatStepModel { ChatProgressStep = ChatProgressStep.Response }" />
+</widget>
+
+<form method="post" id="chat-response-form">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="BusinessId" />
+    <input type="hidden" asp-for="WelcomeMessage" />
+    <input type="hidden" asp-for="Description" />
+    <input type="hidden" asp-for="Instruction" />
+    <input type="hidden" asp-for="Documents" />
+    <input type="hidden" asp-for="OpenAPIKey" />
+    <input type="hidden" asp-for="AzureOpenAPIKey" />
+    <div class="admin-content">
+        <div class="col col-md-6">
+            <div class="row" style="padding-left: 15px;">
+                <a href="@Url.Action("ChatConnection", "Business")" class="btn btn-outline-secondary btn-sm btn-icon mr-3" title="Back to step two"><i class="fa fa-arrow-left"></i></a>
+            </div>
+            <div class="row" style="justify-content: flex-end;">
+                <div class="col-md-3" id="key-status-div" style="display:none;">
+                </div>
+            </div>
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="FBPageId" />
+                </div>
+                <div class="adminData col-md-9">
+                    <input class="key" asp-for="FBPageId" placeholder="Facebook page id" />
+                    <span asp-validation-for="FBPageId"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="FBAccessToken" />
+                </div>
+                <div class="adminData col-md-9">
+                    <input class="key" asp-for="FBAccessToken" placeholder="Facebook access token" />
+                    <span asp-validation-for="FBAccessToken"></span>
+                </div>
+            </div>
+            <div class="row" style="justify-content:flex-end;">
+                <div class="col-md-2" style="text-align: right;">
+                    <button id="btn-test" class="btn btn-primary" type="button" style="display:none" onclick="testConnection()">Connection</button>
+                </div>
+            </div>
+            <div class="row" style="justify-content: flex-end;">
+                <div class="col-md-2" style="text-align: right;">
+                    <button id="btn-finish" class="btn btn-primary" type="button" style="display:none">Finish</button>
+                </div>
+            </div>
+        </div>
+        <div class="col col-md-6">
+
+        </div>
+    </div>
+</form>
+
+<script>
+    var statusDiv = $("#key-status-div");
+    var testButton = $("#btn-test");
+    var nextButton = $("#btn-finish");
+
+    $(".key").on("input", function () {
+        testButton.show();
+    });
+
+    function testConnection() {
+
+        $.throbber.show({
+            message: "Building connection..."
+        });
+
+        var formData = $("#chat-response-form").serialize();
+        debugger
+        $.ajax({
+            url: '@Url.Action("TestFacebookPageConnection")',
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+
+                    $.throbber.hide();
+
+                    testButton.hide();
+
+                    statusDiv.html("<span style='color: green' title='Success'>Connected</span>");
+                    nextButton.show();
+                } else {
+                    $.throbber.hide();
+                    statusDiv.html("<span style='color: red' title='Failed'>Failed</span>");
+                }
+                statusDiv.css("text-align", "right");
+                statusDiv.show();
+            },
+            error: function (xhr, status, error) {
+                $.throbber.hide();
+                console.error(xhr.responseText);
+            }
+        });
+    }
+</script>

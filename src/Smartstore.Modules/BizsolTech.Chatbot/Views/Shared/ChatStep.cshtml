@@ -1,0 +1,86 @@
+﻿@using BizsolTech.Chatbot.Models;
+
+@model ChatStepModel
+
+@{
+    var progresses = new List<dynamic>
+    {
+        // Initial
+        new
+        {
+            Step = ChatProgressStep.Initial,
+            StepName = "initial",
+            Label =  "Welcome",
+            Visited = Model.ChatProgressStep > ChatProgressStep.Initial,
+            Active = Model.ChatProgressStep == ChatProgressStep.Initial,
+            Href = Url.Action("Index")
+        },
+        // Connection
+        new
+        {
+            Step = ChatProgressStep.Connection,
+            StepName = "connection",
+            Label =  "Connect",
+            Visited = Model.ChatProgressStep > ChatProgressStep.Connection,
+            Active = Model.ChatProgressStep == ChatProgressStep.Connection,
+            Href = Url.Action("ChatConnection")
+        },
+        // Response
+        new
+        {
+            Step = ChatProgressStep.Response,
+            StepName = "response",
+            Label =  "Response",
+            Visited = Model.ChatProgressStep > ChatProgressStep.Response,
+            Active = Model.ChatProgressStep == ChatProgressStep.Response,
+            Href = Url.Action("ChatResponse")
+        }
+    };
+}
+
+<div class="costeps row g-0 mx-auto">
+    @foreach (var p in progresses)
+    {
+        string stateClass = null;
+        string href = p.Visited || p.Active ? p.Href : "javascript:void(0)";
+        if (p.Visited)
+        {
+            stateClass = "visited";
+        }
+        else if (p.Active)
+        {
+            stateClass = "active";
+        }
+        else
+        {
+            stateClass = "inactive";
+        }
+        <div class="col-2 costep @stateClass" data-step="complete"> @*to show tick icon*@
+            @*data-step="@p.StepName">*@
+            <a class="costep-link" href="@href">
+                <i class="costep-icon"></i>
+                <span class="costep-label">@p.Label</span>
+            </a>
+        </div>
+    }
+</div>
+
+<style>
+    .costeps {
+        --costep-ring-width: 10px;
+        position: relative;
+        margin: 1rem auto;
+        padding-bottom: 2rem;
+        max-width: 720px;
+        display: flex; /* Use flexbox */
+        flex-wrap: nowrap;
+        justify-content: center; /* Align content horizontally to center */
+        width: 100%; /* Occupy full width */
+    }
+
+    /* Remove margin-inline from mx-auto */
+    .g-0.mx-auto {
+        margin: 0; /* Override margin set by mx-auto */
+    }
+
+</style>

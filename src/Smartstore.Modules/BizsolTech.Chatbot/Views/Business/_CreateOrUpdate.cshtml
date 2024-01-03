@@ -1,0 +1,153 @@
+﻿@using BizsolTech.Chatbot.Models;
+@model BusinessModel
+
+<style>
+    .row {
+        margin-bottom: 10px;
+    }
+
+    /*Checkbox*/
+    .form-check-input:checked {
+        background-color: rgba(0, 160, 0, 1);
+        border-color: rgba(0, 160, 0, 1);
+    }
+</style>
+
+<div asp-validation-summary="All"></div>
+<input sm-if="Model.Id == 0" asp-for="Id" type="hidden" />
+
+<div class="admin-content">
+    <div class="adminRow">
+        <div class="admin-config-group">
+            <div class="head">Facebook</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="adminTitle col-md-3">
+            <smart-label asp-for="FBStatus" />
+        </div>
+        <div class="adminData col-md-9">
+            <input asp-for="FBStatus" />
+            <span asp-validation-for="FBStatus"></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="adminTitle col-md-3">
+            <smart-label asp-for="FBPageId" />
+        </div>
+        <div class="adminData col-md-9">
+            <input asp-for="FBPageId" />
+            <span asp-validation-for="FBPageId"></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="adminTitle col-md-3">
+            <smart-label asp-for="FBAccessToken" />
+        </div>
+        <div class="adminData col-md-9">
+            <input asp-for="FBAccessToken" />
+            <span asp-validation-for="FBAccessToken"></span>
+        </div>
+    </div>
+    <div class="adminRow">
+        <div class="admin-config-group">
+            <div class="head">Webhooks</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="adminTitle col-md-3">
+            <smart-label asp-for="FBWebhookStatus" />
+        </div>
+        <div class="adminData col-md-9">
+            <input asp-for="FBWebhookStatus" />
+            <span asp-validation-for="FBWebhookStatus"></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="adminTitle col-md-3">
+            <smart-label asp-for="FBWebhookVerifyToken" />
+        </div>
+        <div class="adminData col-md-9">
+            <input asp-for="FBWebhookVerifyToken" />
+            <span asp-validation-for="FBWebhookVerifyToken"></span>
+        </div>
+    </div>
+    <div class="adminRow">
+        <div class="admin-config-group">
+            <div class="head">Open AI</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="adminTitle col-md-3">
+            <smart-label asp-for="OpenAPIStatus" />
+        </div>
+        <div class="adminData col-md-9">
+            <input asp-for="OpenAPIStatus" />
+            <span asp-validation-for="OpenAPIStatus"></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="adminTitle col-md-3">
+            <smart-label asp-for="OpenAPIKey" />
+        </div>
+        <div class="adminData col-md-9">
+            <input asp-for="OpenAPIKey" />
+            <span asp-validation-for="OpenAPIKey"></span>
+        </div>
+    </div>
+    <div class="adminRow">
+        <div class="admin-config-group">
+            <div class="head">Azure</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="adminTitle col-md-3">
+            <smart-label asp-for="AzureOpenAPIStatus" />
+        </div>
+        <div class="adminData col-md-9">
+            <input asp-for="AzureOpenAPIStatus" />
+            <span asp-validation-for="AzureOpenAPIStatus"></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="adminTitle col-md-3">
+            <smart-label asp-for="AzureOpenAPIKey" />
+        </div>
+        <div class="adminData col-md-9">
+            <input asp-for="AzureOpenAPIKey" />
+            <span asp-validation-for="AzureOpenAPIKey"></span>
+        </div>
+    </div>
+    <div class="adminRow">
+        <div class="admin-config-group">
+            <div class="head">Audits</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="adminTitle col-md-3">
+            <smart-label asp-for="IsActive" />
+        </div>
+        <div class="adminData col-md-9">
+            <input asp-for="IsActive" />
+            <span asp-validation-for="IsActive"></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="adminTitle col-md-3">
+            <smart-label asp-for="CreatedOnUtc" />
+        </div>
+        <div class="adminData col-md-9">
+            <input asp-for="CreatedOnUtc" />
+            <span asp-validation-for="CreatedOnUtc"></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="adminTitle col-md-3">
+            <smart-label asp-for="UpdatedOnUtc" />
+        </div>
+        <div class="adminData col-md-9">
+            <input asp-for="UpdatedOnUtc" />
+            <span asp-validation-for="UpdatedOnUtc"></span>
+        </div>
+    </div>
+</div>

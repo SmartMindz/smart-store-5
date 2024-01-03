@@ -1,0 +1,221 @@
+﻿@using Microsoft.AspNetCore.Http;
+@using BizsolTech.Chatbot.Models;
+@using Smartstore.Core.Content.Media;
+@model BusinessModel
+
+
+<style>
+    .row {
+        margin-bottom: 10px;
+    }
+
+    .dropzone {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        position: relative;
+        /* Added dotted border with a blue shade */
+        min-height: 150px;
+        border: 2px dotted #3498db; /* Change the color */
+        border-radius: 7px;
+        background: white;
+        padding: 20px 20px;
+    }
+
+        /* Customized the message design */
+        .dropzone .dz-message {
+            text-align: center;
+            margin: 2em 0;
+            font-size: 16px; /* Adjust font size */
+            color: #3498db; /* Change the color */
+            font-weight: bold; /* Make the text bold */
+        }
+
+        /* Custom design for image preview */
+        .dropzone .dz-preview {
+            position: relative;
+            display: inline-block;
+            width: 150px;
+            margin: 0.5em;
+            /* Custom styles for the preview container */
+            border-radius: 10px; /* Rounded corners */
+            background: #f9f9f9; /* Change the background color */
+            border: 2px solid #3498db; /* Border color */
+            padding: 10px; /* Adjust padding */
+        }
+
+            .dropzone .dz-preview img {
+                max-width: 100%; /* Ensure the image fits within its container */
+                max-height: 100%; /* Ensure the image fits within its container */
+                display: block;
+                margin: 0 auto; /* Center the image horizontally */
+            }
+</style>
+
+<widget target-zone="stylesheets">
+    <link rel="stylesheet" href="@Url.Content("~/modules/BizsolTech.Chatbot/css/dropzone.min.css")" />
+</widget>
+<widget target-zone="head_scripts">
+    <script src="@Url.Content("~/modules/BizsolTech.Chatbot/js/dropzone.min.js")"></script>
+</widget>
+
+<form method="post" id="chat-input-form" enctype="multipart/form-data">
+    <input type="hidden" asp-for="BusinessId" />
+    <div class="admin-content">
+        <div class="col col-md-6">
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="BusinessName" />
+                </div>
+                <div class="adminData col-md-9">
+                    <input asp-for="BusinessName" placeholder="Your business name here" />
+                    <span asp-validation-for="BusinessName"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="WelcomeMessage" />
+                </div>
+                <div class="adminData col-md-9">
+                    <input asp-for="WelcomeMessage" placeholder="Message" />
+                    <span asp-validation-for="WelcomeMessage"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="Description" />
+                </div>
+                <div class="adminData  col-md-9">
+                    <textarea asp-for="Description" rows="3" placeholder="Please describe your business"></textarea>
+                    <span asp-validation-for="Description"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="Instruction" />
+                </div>
+                <div class="adminData col-md-9">
+                    <textarea asp-for="Instruction" rows="3" placeholder="Please provide instructions"></textarea>
+                    <span asp-validation-for="Instruction"></span>
+                </div>
+            </div>
+            <div class="adminRow">
+                <div class="admin-config-group">
+                    <div class="head">Documents</div>
+                </div>
+            </div>
+            @* <div class="adminRow">
+            <div class="fu-container">
+            <div class="dropzone-container">
+            <div class="fu-thumb"></div>
+
+            <file-uploader entity-id="@Model.Id"
+            entity-type="ChatInput"
+            media-path="catalog"
+            upload-url="@Url.Action("UploadChatDocument", "Business")"
+            sort-url="@Url.Action("SortChatDocuments", "Business")"
+            file-uploader-name="chatfileuploader"
+            entity-assigment-url="@Url.Action(" ChatInputDocumentsAdd", "Business")"
+            has-template-preview="true"
+            multi-file="true"
+            onuploadcompleted="document_onUploadCompleted" />
+            </div>
+            <div class="fu-progress">
+            <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            </div>
+            </div>
+            </div> *@
+            <div class="dropzone" id="document-input" action="@Url.Action("ChatInput", "Business")">
+            </div>
+            <div class="row" style="justify-content: flex-end;">
+                <div class="col-md-2" style="text-align: right;">
+                    <button id="btn-next" class="btn btn-primary" type="submit">Next</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+
+        </div>
+    </div>
+</form>
+
+<script sm-target-zone="scripts" data-origin="_ChatInput">
+    Dropzone.autoDiscover = false; //prevent from auto binding to dz
+    $(document).ready(function () {
+        var dz = null;
+        $("#document-input").dropzone({
+            autoProcessQueue: false,
+            paramName: "documentfiles",
+            maxFilesize: 5, //mb
+            maxThumbnailFilesize: 1, //mb
+            maxFiles: 5,
+            parallelUploads: 5,
+            uploadMultiple: true,
+            addRemoveLinks: true,
+            init: function () {
+                dz = this;
+
+                // var nextButton = document.getElementById("btn-next");
+                // nextButton.addEventListener("click", function (e) {
+                //     e.preventDefault();
+                //     e.stopPropagation();
+                //     dz.processQueue(); // Process the Dropzone queue
+                // });
+            },
+            success: function (file) {
+                var preview = $(file.previewElement);
+                preview.addClass("dz-success text-success");
+                setTimeout(function () {
+                    dz.removeFile(file);
+                }, 2000);
+            },
+            queuecomplete: function () {
+            },
+            dictDefaultMessage: "You can drag and drop your files here or Click",
+            dictRemoveFile: "Remove"
+        });
+
+        $(document).on("submit", "#chat-input-form", function (e) {
+            e.preventDefault();
+
+            $.throbber.show({
+                message: "Uploading documents and data..."
+            });
+
+            var formData = new FormData($(this)[0]);
+
+            var files = dz.getAcceptedFiles();
+
+            // Append files to FormData
+            for (var i = 0; i < files.length; i++) {
+                formData.append("files", files[i]);
+            }
+
+            // Make AJAX request to submit form data including files
+            $.ajax({
+                url: '@Url.Action("ChatInput", "Business")',
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success === true) {
+                        dz.removeAllFiles(true); //remove the queue files
+
+                        $.throbber.hide();
+
+                        window.location.href = response.redirectUrl;
+                        console.log("Upload successful", response);
+                    } else {
+                        $.throbber.hide();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $.throbber.hide();
+                    console.error("Upload failed", error);
+                }
+            });
+        });
+    });
+</script>
