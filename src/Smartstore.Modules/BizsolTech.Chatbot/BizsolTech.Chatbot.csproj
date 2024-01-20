@@ -5,8 +5,19 @@
         <OutDir>$(OutputPath)</OutDir>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="AWSSDK.Core" Version="3.7.300.28" />
-      <PackageReference Include="AWSSDK.S3" Version="3.7.305.3" />
+      <Compile Remove="Controllers\Subscription\**" />
+      <Compile Remove="Services\Subscription\**" />
+      <EmbeddedResource Remove="Controllers\Subscription\**" />
+      <EmbeddedResource Remove="Services\Subscription\**" />
+      <None Remove="Controllers\Subscription\**" />
+      <None Remove="Services\Subscription\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Include="Services\Subscription\BSTSubscriptionService.cs" />
+      <Compile Include="Services\Subscription\IBSTSubscriptionService.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="AWSSDK.S3" Version="3.7.305.4" />
       <PackageReference Include="itext7" Version="8.0.2" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
         <PrivateAssets>all</PrivateAssets>
@@ -26,5 +37,8 @@
       <Compile Update="Module.cs">
         <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       </Compile>
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Controllers\Subscription\" />
     </ItemGroup>
 </Project>

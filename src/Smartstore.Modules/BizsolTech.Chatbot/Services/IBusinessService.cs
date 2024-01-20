@@ -10,5 +10,8 @@ namespace BizsolTech.Chatbot.Services
         Task<List<BusinessPageEntity>> GetAllAsync();
         Task<BusinessPageEntity> Insert(BusinessPageEntity entity);
         Task<bool> Update(BusinessPageEntity entity);
+
+        Task<bool> InsertBusinessMapping(BusinessPageMappingEntity entity);
+        Task<BusinessPageMappingEntity> GetBusinessMappingById(int id);
     }
 }

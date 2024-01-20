@@ -71,41 +71,43 @@ namespace BizsolTech.Chatbot.Services
                 string accessKey = "AKIAUDAYUBV76LWJTAOH";
                 string accessSecret = "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";
                 string bucketName = "bizsolchatdocs";
-                IAmazonS3 client = new AmazonS3Client(accessKey, accessSecret, Amazon.RegionEndpoint.USEast1);
-                TransferUtility utility = new TransferUtility(client);
-                TransferUtilityUploadRequest request = new TransferUtilityUploadRequest();
-
-
-                Stream stream = new MemoryStream(byteArray);
-                request.BucketName = bucketName;
-                request.Key = fileKey;
-                request.InputStream = stream;
-                utility.Upload(request);
-
-                if (isArchive)
+                using (IAmazonS3 client = new AmazonS3Client(accessKey, accessSecret, Amazon.RegionEndpoint.USEast1))
                 {
-                    string archiveFolderKey = "Archive/" + Path.GetFileNameWithoutExtension(prevFileKey) + "-" + DateTime.Now.ToString("yyyyMMdd") + Path.GetExtension(prevFileKey);
+                    TransferUtility utility = new TransferUtility(client);
+                    TransferUtilityUploadRequest request = new TransferUtilityUploadRequest();
 
-                    var copyFileRequest = new CopyObjectRequest
+
+                    Stream stream = new MemoryStream(byteArray);
+                    request.BucketName = bucketName;
+                    request.Key = fileKey;
+                    request.InputStream = stream;
+                    utility.Upload(request);
+
+                    if (isArchive)
                     {
-                        SourceBucket = _settings.BucketName,
-                        SourceKey = prevFileKey,
-                        DestinationBucket = _settings.BucketName,
-                        DestinationKey = archiveFolderKey
-                    };
-                    CopyObjectResponse copyFileResponse = await client.CopyObjectAsync(copyFileRequest);
-                    if (copyFileResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                    {
-                        var deleteFileRequest = new DeleteObjectRequest
+                        string archiveFolderKey = "Archive/" + Path.GetFileNameWithoutExtension(prevFileKey) + "-" + DateTime.Now.ToString("yyyyMMdd") + Path.GetExtension(prevFileKey);
+
+                        var copyFileRequest = new CopyObjectRequest
                         {
-                            BucketName = _settings.BucketName,
-                            Key = prevFileKey
+                            SourceBucket = _settings.BucketName,
+                            SourceKey = prevFileKey,
+                            DestinationBucket = _settings.BucketName,
+                            DestinationKey = archiveFolderKey
                         };
-                        DeleteObjectResponse fileDeleteResponse = await client.DeleteObjectAsync(deleteFileRequest);
+                        CopyObjectResponse copyFileResponse = await client.CopyObjectAsync(copyFileRequest);
+                        if (copyFileResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                        {
+                            var deleteFileRequest = new DeleteObjectRequest
+                            {
+                                BucketName = _settings.BucketName,
+                                Key = prevFileKey
+                            };
+                            DeleteObjectResponse fileDeleteResponse = await client.DeleteObjectAsync(deleteFileRequest);
+                        }
                     }
-                }
 
-                return true; //indicate that the file was sent
+                    return true; //indicate that the file was sent
+                }
             }
             catch (AmazonS3Exception e)
             {
@@ -122,41 +124,43 @@ namespace BizsolTech.Chatbot.Services
                 string accessSecret = "SNbV45+//BAValXarXd1ZOKYo9ugM9rK+Zu3CXQV";
                 string bucketName = "bizsolchatdocs";
 
-                IAmazonS3 client = new AmazonS3Client(accessKey, accessSecret, Amazon.RegionEndpoint.USEast1);
-                var getObjectRequest = new GetObjectRequest
+                using (IAmazonS3 client = new AmazonS3Client(accessKey, accessSecret, Amazon.RegionEndpoint.USEast1))
                 {
-                    BucketName = bucketName,
-                    Key = fileKey
-                };
-
-                using (GetObjectResponse response = await client.GetObjectAsync(getObjectRequest))
-                //using (StreamReader reader = new StreamReader(response.ResponseStream))
-                //{
-                //    string content = await reader.ReadToEndAsync();
-                //    return content;
-
-                //}
-                using (MemoryStream memStream = new MemoryStream())
-                {
-                    await response.ResponseStream.CopyToAsync(memStream);
-                    memStream.Position = 0; // Reset position to start
-
-                    PdfReader pdfReader = new PdfReader(memStream);
-                    PdfDocument pdfDocument = new PdfDocument(pdfReader);
-
-                    StringBuilder builder = new StringBuilder();
-
-                    for (int i = 1; i <= pdfDocument.GetNumberOfPages(); i++)
+                    var getObjectRequest = new GetObjectRequest
                     {
-                        var page = pdfDocument.GetPage(i);
-                        var text = PdfTextExtractor.GetTextFromPage(page);
-                        builder.Append(text);
+                        BucketName = bucketName,
+                        Key = fileKey
+                    };
+
+                    using (GetObjectResponse response = await client.GetObjectAsync(getObjectRequest))
+                    //using (StreamReader reader = new StreamReader(response.ResponseStream))
+                    //{
+                    //    string content = await reader.ReadToEndAsync();
+                    //    return content;
+
+                    //}
+                    using (MemoryStream memStream = new MemoryStream())
+                    {
+                        await response.ResponseStream.CopyToAsync(memStream);
+                        memStream.Position = 0; // Reset position to start
+
+                        PdfReader pdfReader = new PdfReader(memStream);
+                        PdfDocument pdfDocument = new PdfDocument(pdfReader);
+
+                        StringBuilder builder = new StringBuilder();
+
+                        for (int i = 1; i <= pdfDocument.GetNumberOfPages(); i++)
+                        {
+                            var page = pdfDocument.GetPage(i);
+                            var text = PdfTextExtractor.GetTextFromPage(page);
+                            builder.Append(text);
+                        }
+
+                        pdfReader.Close();
+                        pdfDocument.Close();
+
+                        return builder.ToString();
                     }
-
-                    pdfReader.Close();
-                    pdfDocument.Close();
-
-                    return builder.ToString();
                 }
             }
             catch (AmazonS3Exception e)

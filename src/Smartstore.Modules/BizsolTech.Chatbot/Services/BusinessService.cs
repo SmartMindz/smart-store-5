@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AngleSharp.Dom;
 using BizsolTech.Chatbot.Domain;
 using BizsolTech.Chatbot.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,33 @@ namespace BizsolTech.Chatbot.Services
             catch (Exception)
             {
                 return false;
+            }
+        }
+
+        public async Task<bool> InsertBusinessMapping(BusinessPageMappingEntity entity)
+        {
+            try
+            {
+                Guard.NotNull(entity, nameof(entity));
+                await _db.BusinessMappings().AddAsync(entity);
+                await _db.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<BusinessPageMappingEntity> GetBusinessMappingById(int id)
+        {
+            try
+            {
+                return await _db.BusinessMappings().FindByIdAsync(id);
+            }
+            catch (Exception)
+            {
+                return null;
             }
         }
     }

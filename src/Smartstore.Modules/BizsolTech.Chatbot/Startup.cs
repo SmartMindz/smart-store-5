@@ -1,4 +1,6 @@
 ﻿using System;
+using BizSol.Chatbot.Services;
+using BizsolTech.Chatbot.Events;
 using BizsolTech.Chatbot.Filters;
 using BizsolTech.Chatbot.Services;
 using BizsolTech.Chatbot.Tasks;
@@ -12,6 +14,7 @@ using Smartstore.Data;
 using Smartstore.Data.Providers;
 using Smartstore.Engine;
 using Smartstore.Engine.Builders;
+using Smartstore.Events;
 using Smartstore.Scheduling;
 using Smartstore.Web.Controllers;
 using StackExchange.Profiling;
@@ -29,6 +32,7 @@ namespace BizsolTech.Chatbot
                 services.AddScoped<IBusinessDocumentService, BusinessDocumentService>();
                 services.AddScoped<IBusinessAPIService, BusinessAPIService>();
                 services.AddScoped<IS3StorageService, S3StorageService>();
+                services.AddScoped<IBSTSubscriptionService, BSTSubscriptionService>();
 
                 services.AddScoped<ITask, ReadDocumentContentTask>();
 

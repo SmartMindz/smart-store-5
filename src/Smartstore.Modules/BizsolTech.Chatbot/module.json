@@ -15,8 +15,8 @@
     "MiniProfiler.Shared",
     "MiniProfiler.AspNetCore.Mvc",
     "MiniProfiler.EntityFrameworkCore",
-    "AWSSDK.Core",
     "AWSSDK.S3",
+    "AWSSDK.Core",
     "itext7",
     "itext",
     "itext.commons"

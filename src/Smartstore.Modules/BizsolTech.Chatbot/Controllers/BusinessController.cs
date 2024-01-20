@@ -17,9 +17,11 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Smartstore;
 using Smartstore.ComponentModel;
+using Smartstore.Core;
 using Smartstore.Core.Catalog.Products;
 using Smartstore.Core.Content.Media;
 using Smartstore.Core.Data;
+using Smartstore.Core.Identity;
 using Smartstore.Core.Security;
 using Smartstore.Web.Controllers;
 using Smartstore.Web.Modelling;
@@ -42,6 +44,8 @@ namespace BizsolTech.Chatbot.Controllers
         private readonly MediaExceptionFactory _exceptionFactory;
 
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICustomerService _customerService;
+        private readonly IWorkContext _workContext;
 
         public BusinessController(SmartDbContext dbContext, 
             IBusinessService businessService, 
@@ -52,7 +56,9 @@ namespace BizsolTech.Chatbot.Controllers
             IMediaTypeResolver mediaTypeResolver, 
             MediaSettings mediaSettings, 
             MediaExceptionFactory mediaExceptionFactory, 
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            ICustomerService customerService,
+            IWorkContext workContext)
         {
             _db = dbContext;
             _businessService = businessService;
@@ -64,6 +70,8 @@ namespace BizsolTech.Chatbot.Controllers
             _mediaSettings = mediaSettings;
             _exceptionFactory = mediaExceptionFactory;
             _httpContextAccessor = httpContextAccessor;
+            _customerService = customerService;
+            _workContext = workContext;
         }
 
         #region Utilities
@@ -153,6 +161,12 @@ namespace BizsolTech.Chatbot.Controllers
                     {
                         throw new Exception($"Server error: Failed to create business. '{model.BusinessName}'");
                     }
+
+                    var businessMapping = new BusinessPageMappingEntity();
+                    businessMapping.EntityId = _workContext.CurrentCustomer.Id;
+                    businessMapping.EntityName = nameof(Customer);
+                    businessMapping.BusinessId = response.Id; //businessId
+                    await _businessService.InsertBusinessMapping(businessMapping);
 
                     var businessDocs = await _businessDocumentService.GetAllAsync();
                     for (var i = 0; i < numFiles; ++i)

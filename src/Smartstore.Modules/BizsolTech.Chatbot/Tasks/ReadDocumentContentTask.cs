@@ -33,7 +33,7 @@ namespace BizsolTech.Chatbot.Tasks
             {
                 var content = await _s3StorageService.ReadFileFromS3(document.FileUrl);
 
-                if(!string.IsNullOrEmpty(content))
+                if (!string.IsNullOrEmpty(content))
                 {
                     var success = await _apiService.AddDocumentContent(document.BusinessPageId, content);
                 }
@@ -41,7 +41,6 @@ namespace BizsolTech.Chatbot.Tasks
                 {
                     Logger.Error($"S3Bucket: Read file content error. Doc {document.Name}");
                 }
-
             }
         }
     }
