@@ -1,6 +1,5 @@
 ﻿using System;
 using BizSol.Chatbot.Services;
-using BizsolTech.Chatbot.Events;
 using BizsolTech.Chatbot.Filters;
 using BizsolTech.Chatbot.Services;
 using BizsolTech.Chatbot.Tasks;

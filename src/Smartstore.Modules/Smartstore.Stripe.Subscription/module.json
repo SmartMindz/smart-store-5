@@ -1,0 +1,14 @@
+{
+  "$schema": "../module.schema.json",
+  "Author": "BizsolTech LLC",
+  "Group": "Payment",
+  "SystemName": "Smartstore.Stripe.Subscription",
+  "FriendlyName": "Stripe Subscription",
+  "Description": "Subscripbe to the stripe packages",
+  "Version": "5.1.0",
+  "MinAppVersion": "5.1.0",
+  "Order": 1,
+  "ResourceRootKey": "Plugins.SmartStore.Shipping",
+  "PrivateReferences": [
+  ]
+}

@@ -94,7 +94,7 @@ namespace BizsolTech.Chatbot.Filters
                         {
                             context.Result = new RedirectToRouteResult("BusinessRoute", new { area = Module.ModuleSystemName, controller = "Business", action = "ChatConnection" });
                         }
-                        else (!model.FBPageId.HasValue || model.FBAccessToken.IsNullOrEmpty())
+                        else
                         {
                             context.Result = new RedirectToRouteResult("BusinessRoute", new { area = Module.ModuleSystemName, controller = "Business", action = "ChatResponse" });
                         }
