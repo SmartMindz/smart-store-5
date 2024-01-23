@@ -46,6 +46,20 @@ namespace BizsolTech.Chatbot.Services
             }
         }
 
+        public async Task<List<BusinessPageMappingEntity>> GetBusinessMappings()
+        {
+            var list = new List<BusinessPageMappingEntity>();
+            try
+            {
+                await _db.BusinessMappings().ToListAsync();
+                return list;
+            }
+            catch (Exception)
+            {
+                return list;
+            }
+        }
+
         public async Task<bool> InsertBusinessMapping(BusinessPageMappingEntity entity)
         {
             try

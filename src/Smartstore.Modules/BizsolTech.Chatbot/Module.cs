@@ -9,6 +9,7 @@ namespace BizsolTech.Chatbot
 {
     public class Module:ModuleBase, IConfigurable
     {
+        public static string ModuleSystemName => "BizsolTech.Chatbot"; 
         private readonly ITaskStore _taskStore;
 
         public Module(ITaskStore taskStore)

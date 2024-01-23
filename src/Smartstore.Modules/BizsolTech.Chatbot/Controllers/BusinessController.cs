@@ -47,15 +47,15 @@ namespace BizsolTech.Chatbot.Controllers
         private readonly ICustomerService _customerService;
         private readonly IWorkContext _workContext;
 
-        public BusinessController(SmartDbContext dbContext, 
-            IBusinessService businessService, 
-            IBusinessDocumentService businessDocumentService, 
+        public BusinessController(SmartDbContext dbContext,
+            IBusinessService businessService,
+            IBusinessDocumentService businessDocumentService,
             IBusinessAPIService businessAPIService,
             IS3StorageService s3StorageService,
-            IMediaService mediaService, 
-            IMediaTypeResolver mediaTypeResolver, 
-            MediaSettings mediaSettings, 
-            MediaExceptionFactory mediaExceptionFactory, 
+            IMediaService mediaService,
+            IMediaTypeResolver mediaTypeResolver,
+            MediaSettings mediaSettings,
+            MediaExceptionFactory mediaExceptionFactory,
             IHttpContextAccessor httpContextAccessor,
             ICustomerService customerService,
             IWorkContext workContext)
@@ -100,9 +100,33 @@ namespace BizsolTech.Chatbot.Controllers
         #endregion
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var model = new BusinessModel();
+
+            var customer = _workContext.CurrentCustomer;
+            var businessAll = await _businessAPI.GetBusinessAll();
+            var businessMapping = await _businessService.GetBusinessMappings();
+            if (businessMapping.Count > 0)
+            {
+                var businessId = businessMapping.FirstOrDefault(m => m.EntityId.Equals(customer.Id) && m.EntityName.Equals(nameof(Customer)) && businessAll.Exists(b => b.Id.Equals(m.BusinessId)));
+                if (businessId != null)
+                {
+                    var business = businessAll.FirstOrDefault(b => b.Id.Equals(customer.Id));
+
+                    model.Id = business.Id; //businessId from server
+                    model.BusinessName = business.BusinessName;
+                    model.WelcomeMessage = business.WelcomeMessage;
+                    model.Description = business.Description;
+                    model.Instruction = business.Instruction;
+                    model.OpenAPIKey = business.OpenAPIKey;
+                    model.OpenAPIStatus = business.OpenAPIStatus;
+                    model.FBPageId = int.Parse(business.FBPageId);
+                    model.FBAccessToken = business.FBAccessToken;
+                    model.FBStatus = business.FBStatus;
+                    var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
+                }
+            }
 
             var session = _httpContextAccessor.HttpContext?.Session;
 
@@ -117,7 +141,7 @@ namespace BizsolTech.Chatbot.Controllers
         }
 
         [HttpGet]
-        public IActionResult ChatInput()
+        public async Task<IActionResult> ChatInput()
         {
             var model = new BusinessModel();
             var session = _httpContextAccessor.HttpContext?.Session;
@@ -151,7 +175,7 @@ namespace BizsolTech.Chatbot.Controllers
                         CollectionName = "Collection_" + model.BusinessName,
                     };
 
-                    if(businessAll.Any(b => b.BusinessName == model.BusinessName))
+                    if (businessAll.Any(b => b.BusinessName == model.BusinessName))
                     {
                         throw new Exception($"Server error: Business with name '{model.BusinessName}' already exists.");
                     }
@@ -192,11 +216,11 @@ namespace BizsolTech.Chatbot.Controllers
                             OpenAIFileID = "OPENAIFILEID"
                         };
 
-                        if(businessDocs.Any(d => d.Name == fileName && d.Extension == extension))
+                        if (businessDocs.Any(d => d.Name == fileName && d.Extension == extension))
                         {
                             var existingFile = businessDocs.FirstOrDefault(d => d.Name == fileName && d.Extension == extension);
                             var existingCRC = uint.Parse(existingFile?.CRC);
-                            if(crc != existingCRC)
+                            if (crc != existingCRC)
                             {
                                 existingFile.CRC = crc.ToString();
                                 existingFile.Size = int.Parse(fileSize.ToString());
@@ -248,7 +272,7 @@ namespace BizsolTech.Chatbot.Controllers
         }
 
         [HttpPost]
-        public async  Task<IActionResult> TestOpenAIConnection(BusinessModel model,IFormCollection form)
+        public async Task<IActionResult> TestOpenAIConnection(BusinessModel model, IFormCollection form)
         {
             var success = await _businessAPI.VerifyOpenAICredentials(model.Id, model.OpenAPIKey);
             //store params

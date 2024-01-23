@@ -41,6 +41,8 @@ namespace BizsolTech.Chatbot
                 {
                     o.Filters.AddConditional<ChatbotRegisterResultFilter>(
                         context => context.ControllerIs<IdentityController>());
+                    o.Filters.AddConditional<ChatbotLoginFilter>(
+                        context => context.ControllerIs<IdentityController>());
                 });
 
                 services.AddMiniProfiler(o =>
@@ -113,7 +115,7 @@ namespace BizsolTech.Chatbot
                     "business/{action}/{id?}",
                     new { controller = "Business", action = "Index" },
                     null,
-                    new { area = "BizsolTech.Chatbot" }
+                    new { area = Module.ModuleSystemName }
                     );
             });
         }

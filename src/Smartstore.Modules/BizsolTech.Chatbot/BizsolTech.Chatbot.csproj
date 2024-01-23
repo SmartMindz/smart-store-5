@@ -13,6 +13,9 @@
       <None Remove="Services\Subscription\**" />
     </ItemGroup>
     <ItemGroup>
+      <Compile Remove="Events\OrderPlacedEventConsumer.cs" />
+    </ItemGroup>
+    <ItemGroup>
       <Compile Include="Services\Subscription\BSTSubscriptionService.cs" />
       <Compile Include="Services\Subscription\IBSTSubscriptionService.cs" />
     </ItemGroup>
@@ -39,6 +42,6 @@
       </Compile>
     </ItemGroup>
     <ItemGroup>
-      <Folder Include="Controllers\Subscription\" />
+      <Folder Include="Events\" />
     </ItemGroup>
 </Project>
