@@ -27,6 +27,7 @@ using Smartstore.Web.Controllers;
 using Smartstore.Web.Modelling;
 using Smartstore.Web.Modelling.Settings;
 using Smartstore.Web.Models.DataGrid;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BizsolTech.Chatbot.Controllers
@@ -76,13 +77,18 @@ namespace BizsolTech.Chatbot.Controllers
 
         #region Utilities
 
-        private void PrepareBusinessModel(BusinessModel model, BusinessPageEntity entity)
+        private void PrepareBusinessModel(BusinessModel model, Business entity)
         {
             if (entity == null) { return; }
             else
             {
-                model.AdminId = entity.AdminId;
-                model.FBPageId = entity.FBPageId;
+                model.Id = entity.Id;
+                //model.AdminId = entity.AdminId;
+                model.BusinessName = entity.BusinessName;
+                model.Description = entity.Description;
+                model.Instruction = entity.Instruction;
+                model.CollectionName = entity.CollectionName;
+                model.FBPageId = long.Parse(entity.FBPageId);
                 model.FBAccessToken = entity.FBAccessToken;
                 model.FBStatus = entity.FBStatus;
                 model.FBWebhookVerifyToken = entity.FBWebhookVerifyToken;
@@ -91,62 +97,47 @@ namespace BizsolTech.Chatbot.Controllers
                 model.OpenAPIStatus = entity.OpenAPIStatus;
                 model.AzureOpenAPIKey = entity.AzureOpenAPIKey;
                 model.AzureOpenAPIStatus = entity.AzureOpenAPIStatus;
-                model.IsActive = entity.IsActive;
-                model.CreatedOnUtc = entity.CreatedOnUtc;
-                model.UpdatedOnUtc = entity.UpdatedOnUtc;
+                model.IsActive = true;
+                //model.CreatedOnUtc = entity.CreatedOnUtc;
+                //model.UpdatedOnUtc = entity.UpdatedOnUtc;
             }
         }
 
         #endregion
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? id)
         {
             var model = new BusinessModel();
-
-            var customer = _workContext.CurrentCustomer;
-            var businessAll = await _businessAPI.GetBusinessAll();
-            var businessMapping = await _businessService.GetBusinessMappings();
-            if (businessMapping.Count > 0)
-            {
-                var businessId = businessMapping.FirstOrDefault(m => m.EntityId.Equals(customer.Id) && m.EntityName.Equals(nameof(Customer)) && businessAll.Exists(b => b.Id.Equals(m.BusinessId)));
-                if (businessId != null)
-                {
-                    var business = businessAll.FirstOrDefault(b => b.Id.Equals(customer.Id));
-
-                    model.Id = business.Id; //businessId from server
-                    model.BusinessName = business.BusinessName;
-                    model.WelcomeMessage = business.WelcomeMessage;
-                    model.Description = business.Description;
-                    model.Instruction = business.Instruction;
-                    model.OpenAPIKey = business.OpenAPIKey;
-                    model.OpenAPIStatus = business.OpenAPIStatus;
-                    model.FBPageId = int.Parse(business.FBPageId);
-                    model.FBAccessToken = business.FBAccessToken;
-                    model.FBStatus = business.FBStatus;
-                    var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
-                }
-            }
-
             var session = _httpContextAccessor.HttpContext?.Session;
-
-            if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
+            if (id.HasValue && id != null)
+            {
+                var business = await _businessAPI.GetBusiness(id.Value);
+                PrepareBusinessModel(model, business);
+                return View(model);
+            }
+            else if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
             {
                 return View(inputModel);
             }
             else
             {
-                return View(model);
+                return View(new BusinessModel());
             }
         }
 
         [HttpGet]
-        public async Task<IActionResult> ChatInput()
+        public async Task<IActionResult> ChatInput(int? id)
         {
             var model = new BusinessModel();
             var session = _httpContextAccessor.HttpContext?.Session;
-
-            if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
+            if (id.HasValue)
+            {
+                var business = await _businessAPI.GetBusiness(id.Value);
+                PrepareBusinessModel(model, business);
+                return PartialView("_ChatInput", model);
+            }
+            else if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
             {
                 return PartialView("_ChatInput", inputModel);
             }
@@ -163,34 +154,58 @@ namespace BizsolTech.Chatbot.Controllers
             var numFiles = Request.Form.Files.Count;
             try
             {
-                var businessAll = await _businessAPI.GetBusinessAll();
+                var customer = _workContext.CurrentCustomer;
+                var customerBusinesses = await _businessService.GetCustomerBusinessAll(customer);
+
+                Business _response;
                 if (ModelState.IsValid)
                 {
-                    var businessPage = new Business
-                    {
-                        BusinessName = model.BusinessName,
-                        WelcomeMessage = model.WelcomeMessage,
-                        Instruction = model.Instruction,
-                        Description = model.Description,
-                        CollectionName = "Collection_" + model.BusinessName,
-                    };
+                    string bName = model.BusinessName.Replace(" ", "_"); //xy_z
 
-                    if (businessAll.Any(b => b.BusinessName == model.BusinessName))
+                    if (model.Id != 0 && customerBusinesses.Exists(b => b.Id.Equals(model.Id)))
                     {
-                        throw new Exception($"Server error: Business with name '{model.BusinessName}' already exists.");
+                        var businessPage = customerBusinesses.FirstOrDefault(b => b.Id == model.Id);
+                        businessPage.BusinessName = bName;
+                        businessPage.WelcomeMessage = model.WelcomeMessage;
+                        businessPage.Instruction = model.Instruction;
+                        businessPage.Description = model.Description;
+
+                        //update
+                        var success = await _businessAPI.UpdateBusiness(businessPage);
+                        if (!success)
+                        {
+                            throw new Exception($"Server error: Failed to update business. '{model.BusinessName}'");
+                        }
+                        _response = businessPage;
                     }
-
-                    var response = await _businessAPI.AddBusiness(businessPage);
-                    if (response == null)
+                    else
                     {
-                        throw new Exception($"Server error: Failed to create business. '{model.BusinessName}'");
-                    }
+                        if (customerBusinesses.Any(b => b.BusinessName == bName))
+                        {
+                            throw new Exception($"Server error: Business with name '{model.BusinessName}' already exists.");
+                        }
 
-                    var businessMapping = new BusinessPageMappingEntity();
-                    businessMapping.EntityId = _workContext.CurrentCustomer.Id;
-                    businessMapping.EntityName = nameof(Customer);
-                    businessMapping.BusinessId = response.Id; //businessId
-                    await _businessService.InsertBusinessMapping(businessMapping);
+                        var businessPage = new Business
+                        {
+                            BusinessName = bName,
+                            WelcomeMessage = model.WelcomeMessage,
+                            Instruction = model.Instruction,
+                            Description = model.Description,
+                            CollectionName = "Collection_" + bName,
+                        };
+
+                        _response = await _businessAPI.AddBusiness(businessPage);
+                        if (_response == null)
+                        {
+                            throw new Exception($"Server error: Failed to create business. '{model.BusinessName}'");
+                        }
+
+                        var businessMapping = new BusinessPageMappingEntity();
+                        businessMapping.EntityId = _workContext.CurrentCustomer.Id;
+                        businessMapping.EntityName = nameof(Customer);
+                        businessMapping.BusinessId = _response.Id; //businessId
+                        await _businessService.InsertBusinessMapping(businessMapping);
+                    }
 
                     var businessDocs = await _businessDocumentService.GetAllAsync();
                     for (var i = 0; i < numFiles; ++i)
@@ -206,7 +221,7 @@ namespace BizsolTech.Chatbot.Controllers
                         var crc = CRC32Calculator.CalculateCRC32FromFile(file);
                         var document = new BusinessDocumentEntity
                         {
-                            BusinessPageId = response.Id,
+                            BusinessPageId = _response.Id,
                             Name = fileName,
                             Size = int.Parse(fileSize.ToString()),
                             UpdateRequired = true,
@@ -232,9 +247,9 @@ namespace BizsolTech.Chatbot.Controllers
                         {
                             await _businessDocumentService.Insert(document);
                         }
-                        model.Id = response.Id;
+                        model.Id = _response.Id;
                         model.Documents.Add(document);
-                        var success = await _s3StorageService.AddDocument(document, response.BusinessName, fileName, "prevKey", byteArray, false);
+                        var success = await _s3StorageService.AddDocument(document, _response.BusinessName, fileName, "prevKey", byteArray, false);
                     }
 
                     var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
@@ -255,18 +270,24 @@ namespace BizsolTech.Chatbot.Controllers
         }
 
         [HttpGet]
-        public IActionResult ChatConnection()
+        public async Task<IActionResult> ChatConnection(int? id)
         {
             var session = _httpContextAccessor.HttpContext?.Session;
-
-            if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
+            var model = new BusinessModel();
+            if (id.HasValue)
+            {
+                var business = await _businessAPI.GetBusiness(id.Value);
+                PrepareBusinessModel(model, business);
+                return PartialView("_ChatConnection", model);
+            }
+            else if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
             {
                 return PartialView("_ChatConnection", inputModel);
             }
             else
             {
                 NotifyError("Input data from session is missing!");
-                return PartialView("_ChatConnection", new BusinessModel());
+                return PartialView("_ChatConnection", model);
             }
 
         }
@@ -290,12 +311,18 @@ namespace BizsolTech.Chatbot.Controllers
         }
 
         [HttpGet]
-        public IActionResult ChatResponse()
+        public async Task<IActionResult> ChatResponse(int? id)
         {
             var model = new BusinessModel();
             var session = _httpContextAccessor.HttpContext?.Session;
 
-            if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
+            if (id.HasValue)
+            {
+                var business = await _businessAPI.GetBusiness(id.Value);
+                PrepareBusinessModel(model, business);
+                return PartialView("_ChatResponse", model);
+            }
+            else if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
             {
                 return PartialView("_ChatResponse", inputModel);
             }
@@ -317,12 +344,19 @@ namespace BizsolTech.Chatbot.Controllers
         {
             try
             {
-                var businessList = await _businessService.GetAllAsync();
+                var customer = _workContext.CurrentCustomer;
+                var businessList = await _businessService.GetCustomerBusinessAll(customer);
 
-                var rows = businessList.Select(b => new BusinessModel
+                var rows = businessList.Select(b =>
+                new BusinessModel
                 {
-                    AdminId = b.AdminId,
-                    FBPageId = b.FBPageId,
+                    Id = b.Id,
+                    AdminId = 0,
+                    BusinessName = b.BusinessName,
+                    CollectionName = b.CollectionName,
+                    Description = b.Description,
+                    Instruction = b.Instruction,
+                    FBPageId = long.Parse(b.FBPageId),
                     FBAccessToken = b.FBAccessToken,
                     FBStatus = b.FBStatus,
                     FBWebhookVerifyToken = b.FBWebhookVerifyToken,
@@ -331,11 +365,12 @@ namespace BizsolTech.Chatbot.Controllers
                     OpenAPIStatus = b.OpenAPIStatus,
                     AzureOpenAPIKey = b.AzureOpenAPIKey,
                     AzureOpenAPIStatus = b.AzureOpenAPIStatus,
-                    IsActive = b.IsActive,
-                    CreatedOnUtc = b.CreatedOnUtc,
-                    UpdatedOnUtc = b.UpdatedOnUtc,
-                    EditUrl = Url.Action(nameof(Edit), "Business", new { id = b.Id }),
-                }).ToList();
+                    IsActive = true,
+                    CreatedOnUtc = DateTime.Now.ToUniversalTime(),
+                    UpdatedOnUtc = DateTime.Now.ToUniversalTime(),
+                    EditUrl = Url.Action(nameof(Index), "Business", new { id = b.Id })
+                }
+                ).ToList();
 
                 return Ok(new GridModel<BusinessModel>
                 {
@@ -352,7 +387,7 @@ namespace BizsolTech.Chatbot.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var business = await _businessService.Get(id);
+            var business = await _businessAPI.GetBusiness(id);
 
             if (business == null)
             {
@@ -370,7 +405,7 @@ namespace BizsolTech.Chatbot.Controllers
         [FormValueRequired("save")]
         public async Task<IActionResult> Edit(BusinessModel model, IFormCollection form)
         {
-            var business = await _businessService.Get(model.Id);
+            var business = await _businessAPI.GetBusiness(model.Id);
             if (business == null)
             {
                 return NotFound();
@@ -380,8 +415,7 @@ namespace BizsolTech.Chatbot.Controllers
             {
                 try
                 {
-                    business.AdminId = model.AdminId;
-                    business.FBPageId = model.FBPageId;
+                    business.FBPageId = model.FBPageId.ToString();
                     business.FBAccessToken = model.FBAccessToken;
                     business.FBStatus = model.FBStatus;
                     business.FBWebhookVerifyToken = model.FBWebhookVerifyToken;
@@ -390,11 +424,8 @@ namespace BizsolTech.Chatbot.Controllers
                     business.OpenAPIStatus = model.OpenAPIStatus;
                     business.AzureOpenAPIKey = model.AzureOpenAPIKey;
                     business.AzureOpenAPIStatus = model.AzureOpenAPIStatus;
-                    business.IsActive = model.IsActive;
-                    business.CreatedOnUtc = model.CreatedOnUtc;
-                    business.UpdatedOnUtc = DateTime.UtcNow;
 
-                    await _businessService.Update(business);
+                    await _businessAPI.UpdateBusiness(business);
 
                     NotifySuccess("Business page updated!");
                     return RedirectToAction(nameof(Edit), business.Id);

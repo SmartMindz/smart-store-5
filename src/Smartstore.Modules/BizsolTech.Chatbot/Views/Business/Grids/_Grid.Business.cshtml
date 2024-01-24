@@ -42,6 +42,8 @@
     </search-panel>*@
     <columns>
         <column for="Id" visible="false" type="string" />
+        <column for="BusinessName" hideable="false" type="string" />
+        <column for="CollectionName" hideable="false" type="string" />
         <column for="FBPageId" hideable="false">
             <display-template>
                 <a :href="item.row.EditUrl" class="text-truncate">

@@ -26,6 +26,7 @@ namespace BizsolTech.Chatbot.Services
         Task<List<Business>> GetBusinessAll();
         Task<Business> GetBusiness(int businessId);
         Task<Business> AddBusiness(Business business);
+        Task<bool> UpdateBusiness(Business business);
     }
 
     public class BusinessAPIService : IBusinessAPIService
@@ -121,6 +122,41 @@ namespace BizsolTech.Chatbot.Services
                 {
                     Logger.Error($"AddBusiness: API response:{response.StatusCode}");
                     return null;
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateBusiness(Business business)
+        {
+            try
+            {
+                var apiUrl = "/api/Business/Update";
+
+                Dictionary<string, string> parameters = new Dictionary<string, string>() {
+                    { "id", $"{business.Id}" }
+                };
+                var requestBody = new
+                {
+                    businessName = business.BusinessName,
+                    description = business.Description,
+                    instructions = business.Instruction,
+                    welcomeMessage = business.WelcomeMessage
+                };
+
+                var response = await _apiHandler.PutAsync(apiUrl, requestBody, parameters);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    return true;
+                }
+                else
+                {
+                    Logger.Error($"UpdateBusiness: API response:{response.StatusCode}");
+                    return false;
                 }
             }
             catch

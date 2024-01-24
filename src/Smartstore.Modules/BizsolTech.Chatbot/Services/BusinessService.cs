@@ -1,22 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
 using BizsolTech.Chatbot.Domain;
 using BizsolTech.Chatbot.Extensions;
+using BizsolTech.Models.Business;
 using Microsoft.EntityFrameworkCore;
 using Smartstore;
 using Smartstore.Core.Data;
+using Smartstore.Core.Identity;
 
 namespace BizsolTech.Chatbot.Services
 {
     public class BusinessService : IBusinessService
     {
         private readonly SmartDbContext _db;
+        private readonly IBusinessAPIService _apiService;
 
-        public BusinessService(SmartDbContext db)
+        public BusinessService(SmartDbContext db, IBusinessAPIService apiService)
         {
             this._db = db;
+            _apiService = apiService;
         }
         public async Task<List<BusinessPageEntity>> GetAllAsync()
         {
@@ -51,7 +56,30 @@ namespace BizsolTech.Chatbot.Services
             var list = new List<BusinessPageMappingEntity>();
             try
             {
-                await _db.BusinessMappings().ToListAsync();
+                list = await _db.BusinessMappings().ToListAsync();
+                return list;
+            }
+            catch (Exception)
+            {
+                return list;
+            }
+        }
+
+        public async Task<List<Business>> GetCustomerBusinessAll(Customer customer)
+        {
+            Guard.NotNull(customer, nameof(Customer));
+            var list = new List<Business>();
+            try
+            {
+                var businessAll = await _apiService.GetBusinessAll();
+                var businessMapping = await GetBusinessMappings();
+
+                var customerMappings = businessMapping.Where(m => m.EntityId.Equals(customer.Id) && m.EntityName.Equals(nameof(Customer)) && businessAll.Exists(b => b.Id.Equals(m.BusinessId)));
+                foreach (var map in customerMappings)
+                {
+                    var result = businessAll.FirstOrDefault(b => b.Id == map.BusinessId);
+                    list.Add(result);
+                }
                 return list;
             }
             catch (Exception)

@@ -43,64 +43,60 @@ namespace BizsolTech.Chatbot.Filters
                 if (context.HttpContext.Request.Method == "POST")
                 {
                     Customer customer;
-                    var customerLoginType = context.HttpContext.Request.Form["model.CustomerLoginType"];
+                    var customerLoginType = context.HttpContext.Request.Form["CustomerLoginType"];
 
                     if (customerLoginType == CustomerLoginType.Username)
                     {
-                        var username = context.HttpContext.Request.Form["model.Username"].ToString();
+                        var username = context.HttpContext.Request.Form["Username"].ToString();
                         customer = await _userManager.FindByNameAsync(username.TrimSafe());
                     }
                     else if (customerLoginType == CustomerLoginType.Email)
                     {
-                        var email = context.HttpContext.Request.Form["model.Email"].ToString();
+                        var email = context.HttpContext.Request.Form["Email"].ToString();
                         customer = await _userManager.FindByEmailAsync(email.TrimSafe());
                     }
                     else
                     {
-                        var userNameOrEmail = context.HttpContext.Request.Form["model.UsernameOrEmail"].ToString();
+                        var userNameOrEmail = context.HttpContext.Request.Form["UsernameOrEmail"].ToString();
                         customer = await _userManager.FindByEmailAsync(userNameOrEmail.TrimSafe()) ?? await _userManager.FindByNameAsync(userNameOrEmail.TrimSafe());
                     }
 
                     if (customer != null)
                     {
                         var model = new BusinessModel();
-                        var mappings = await _businessService.GetBusinessMappings();
-                        var bMapping = mappings.FirstOrDefault(m => m.EntityId.Equals(customer.Id) && m.EntityName.Equals(nameof(Customer)));
+                        var customerBusinesses = await _businessService.GetCustomerBusinessAll(customer);
 
-                        if (bMapping != null)
-                        {
-                            var business = await _businessAPI.GetBusiness(bMapping.BusinessId);
-                            if (business != null)
-                            {
-                                model.Id = business.Id; //businessId from server
-                                model.BusinessName = business.BusinessName;
-                                model.WelcomeMessage = business.WelcomeMessage;
-                                model.Description = business.Description;
-                                model.Instruction = business.Instruction;
-                                model.OpenAPIKey = business.OpenAPIKey;
-                                model.OpenAPIStatus = business.OpenAPIStatus;
-                                model.FBPageId = int.Parse(business.FBPageId);
-                                model.FBAccessToken = business.FBAccessToken;
-                                model.FBStatus = business.FBStatus;
-                                var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
-                            }
-                        }
-
-                        if (model.BusinessName.IsNullOrEmpty() || model.Description.IsNullOrEmpty() || model.Instruction.IsNullOrEmpty())
+                        if (customerBusinesses.Count == 0)
                         {
                             context.Result = new RedirectToRouteResult("BusinessRoute", new { area = Module.ModuleSystemName, controller = "Business", action = "Index" });
                         }
-                        else if (model.OpenAPIKey.IsNullOrEmpty() || model.OpenAPIStatus == false)
+                        else if (customerBusinesses.Count == 1)
                         {
-                            context.Result = new RedirectToRouteResult("BusinessRoute", new { area = Module.ModuleSystemName, controller = "Business", action = "ChatConnection" });
+                            if (customerBusinesses[0].BusinessName.IsNullOrEmpty() || customerBusinesses[0].Description.IsNullOrEmpty() || customerBusinesses[0].Instruction.IsNullOrEmpty())
+                            {
+                                context.Result = new RedirectToRouteResult("BusinessRoute", new { area = Module.ModuleSystemName, controller = "Business", action = "Index", id = customerBusinesses[0].Id });
+                            }
+                            else if (customerBusinesses[0].OpenAPIKey.IsNullOrEmpty() || customerBusinesses[0].OpenAPIStatus == false)
+                            {
+                                context.Result = new RedirectToRouteResult("BusinessRoute", new { area = Module.ModuleSystemName, controller = "Business", action = "ChatConnection", id = customerBusinesses[0].Id });
+                            }
+                            else
+                            {
+                                context.Result = new RedirectToRouteResult("BusinessRoute", new { area = Module.ModuleSystemName, controller = "Business", action = "ChatResponse", id = customerBusinesses[0].Id });
+                            }
+                        }
+                        else if (customerBusinesses.Count > 1)
+                        {
+                            context.Result = new RedirectToActionResult("List", "Product", new { area = "Admin" });
                         }
                         else
                         {
-                            context.Result = new RedirectToRouteResult("BusinessRoute", new { area = Module.ModuleSystemName, controller = "Business", action = "ChatResponse" });
+                            // Halt the execution here, do not invoke the next filter or action
+                            return;
                         }
-
-
-                        // Halt the execution here, do not invoke the next filter or action
+                    }
+                    else
+                    {
                         return;
                     }
                 }
