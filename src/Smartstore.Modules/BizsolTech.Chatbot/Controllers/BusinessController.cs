@@ -177,7 +177,14 @@ namespace BizsolTech.Chatbot.Controllers
                 Business _response;
                 if (ModelState.IsValid)
                 {
-                    string bName = model.BusinessName.Replace(" ", "_"); //xy_z
+                    string bName = string.Empty;
+
+                    if (!string.IsNullOrEmpty(model.BusinessName))
+                    {
+                        bName = model.BusinessName.Replace(" ", "_"); //xy_z
+                    }
+                    
+                    bName = model.BusinessName.Replace(" ", "_"); //xy_z
 
                     if (model.Id != 0 && customerBusinesses.Exists(b => b.Id.Equals(model.Id)))
                     {
