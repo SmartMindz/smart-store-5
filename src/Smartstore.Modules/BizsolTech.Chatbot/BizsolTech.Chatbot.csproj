@@ -16,8 +16,20 @@
       <Compile Remove="Events\OrderPlacedEventConsumer.cs" />
     </ItemGroup>
     <ItemGroup>
+      <None Remove="Scripts\js\kendo.all.min.js" />
+      <None Remove="Views\Business\ChatList.cshtml" />
+      <None Remove="Views\Business\Grids\_Grid.BusinessChat.cshtml" />
+      <None Remove="wwwroot\kendo\kendo.common.min.css" />
+      <None Remove="wwwroot\kendo\kendo.default.min.css" />
+    </ItemGroup>
+    <ItemGroup>
       <Compile Include="Services\Subscription\BSTSubscriptionService.cs" />
       <Compile Include="Services\Subscription\IBSTSubscriptionService.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="Scripts\js\kendo.all.min.js">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="AWSSDK.S3" Version="3.7.305.4" />

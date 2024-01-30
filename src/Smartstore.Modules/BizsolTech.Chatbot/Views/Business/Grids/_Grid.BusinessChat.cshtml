@@ -1,0 +1,40 @@
+﻿@using BizsolTech.Chatbot.Models;
+@model BusinessChatModel
+
+<datagrid id="business-chat-grid"
+          allow-resize="true"
+          allow-row-selection="true"
+          allow-column-reordering="true"
+          onrowclass="chatGrid_onRowClass">
+    <datasource read="@Url.Action("ChatList")" delete="@Url.Action("ChatDelete")" />
+    <paging position="Bottom" show-size-chooser="true" />
+    <sorting enabled="true" allow-unsort="true" allow-multisort="false">
+        <sort by="CreatedAt" by-entity-member="CreatedAt" descending="true" />
+    </sorting>
+    <toolbar>
+        <toolbar-group>
+            <button datagrid-action="DataGridToolAction.ToggleSearchPanel" class="btn btn-light btn-icon">
+                <i class="fa fa-fw fa-filter"></i>
+            </button>
+        </toolbar-group>
+        <zone name="datagrid_toolbar_alpha"></zone>
+        <toolbar-group class="omega"></toolbar-group>
+        <zone name="datagrid_toolbar_omega"></zone>
+    </toolbar>
+    <columns>
+        <column for="Id" visible="false" type="string" />
+        <column for="BusinessId" hideable="false" type="string" />
+        <column for="SenderId" hideable="false" type="string" />
+        <column for="Question" hideable="false" type="string" />
+        <column for="Answer" hideable="false" type="string" />
+        <column for="CreatedAt" entity-member="CreatedAt" />
+    </columns>
+</datagrid>
+
+<script sm-target-zone="scripts" data-origin="business-chat-grid">
+    function chatGrid_onRowClass(row) {
+        return {
+            "text-muted": !row.Active
+        };
+    }
+</script>

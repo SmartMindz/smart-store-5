@@ -5,6 +5,8 @@ using BizsolTech.Chatbot.Helpers;
 using BizsolTech.Chatbot.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.IdentityModel.Tokens;
+using NUglify.Helpers;
 using Smartstore.Scheduling;
 
 namespace BizsolTech.Chatbot.Tasks
@@ -35,7 +37,13 @@ namespace BizsolTech.Chatbot.Tasks
 
                 if (!string.IsNullOrEmpty(content))
                 {
-                    var success = await _apiService.AddDocumentContent(document.BusinessPageId, content);
+                    var id = await _apiService.AddDocumentContent(document.BusinessPageId, content);
+                    if(!id.IsNullOrEmpty() || !id.IsNullOrWhiteSpace())
+                    {
+                        document.SemanticRef = id;
+                        document.UpdateRequired = false;
+                        await _businessDocumentService.Update(document);
+                    }
                 }
                 else
                 {

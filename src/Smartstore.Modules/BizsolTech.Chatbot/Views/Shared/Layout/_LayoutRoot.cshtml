@@ -8,7 +8,7 @@
     <meta name="keywords" content="@Assets.GetMetaKeywords()" />
     <meta name="generator" content="Smartstore @SmartstoreVersion.CurrentFullVersion" />
     <meta property="sm:root" content="@Url.Content("~/")" />
-    @await Component.InvokeAsync("AntiForgeryToken")
+        @await Component.InvokeAsync("AntiForgeryToken")
 
     <title itemprop="name">@Assets.GetDocumentTitle(true)</title>
 
@@ -19,13 +19,21 @@
 
     <zone name="stylesheets">
         <link rel="stylesheet" href="~/bundle/css/site-common.css" />
+
+        <link rel="stylesheet" href="~/bundle/css/admin-common.css" />
+        <link rel="stylesheet" href="~/bundle/css/admin-theme.css" />
+            @if (WorkContext.WorkingLanguage.Rtl)
+            {
+            <link rel="stylesheet" href="~/bundle/css/admin-theme-rtl.css" />
+            }
     </zone>
 
     <zone name="head_scripts">
         <script src="~/bundle/js/jquery.js"></script>
+        <script src="~/bundle/js/vue.js"></script>
     </zone>
 
-    @* Preload web font files to avoid FOIT (Flash of Invisible Text) and FOUT (Flash of Unstyled Text) *@
+        @* Preload web font files to avoid FOIT (Flash of Invisible Text) and FOUT (Flash of Unstyled Text) *@
     <link as="font" href="~/lib/fontastic/fonts/fontastic.woff" crossorigin />
     <link as="font" href="~/lib/fa6/webfonts/fa-solid-900.woff2" crossorigin />
     <link as="font" href="~/lib/fa6/webfonts/fa-regular-400.woff2" crossorigin />
@@ -36,16 +44,18 @@
 
     <script src="~/js/smartstore.globalization.adapter.js"></script>
 
-    @await Component.InvokeAsync("Favicon")
+        @await Component.InvokeAsync("Favicon")
 </head>
 
 <body class="lyt-cols-1">
     <zone name="start" />
-    @RenderBody()
+        @RenderBody()
     <zone name="aftercontent" />@* Not available via widgetzones.json. Name colides with content_after and it's unnecassary there.*@
 
     <zone name="scripts">
         <script src="~/bundle/js/site.js"></script>
+        <script src="~/bundle/js/admin.js"></script>
+        <script src="~/bundle/js/datagrid.js"></script>
         <script src="~/lib/select2/js/i18n/{lang}.js" sm-locale-for="WorkContext.WorkingLanguage"></script>
         <script src="~/lib/moment/locale/{lang}.js" sm-locale-for="WorkContext.WorkingLanguage"></script>
     </zone>

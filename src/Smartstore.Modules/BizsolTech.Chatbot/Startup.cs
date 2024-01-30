@@ -28,6 +28,7 @@ namespace BizsolTech.Chatbot
             {
                 services.AddTransient<IDbContextConfigurationSource<SmartDbContext>, SmartDbContextConfigurer>();
                 services.AddScoped<IBusinessService, BusinessService>();
+                services.AddScoped<IBusinessChatService, BusinessChatService>();
                 services.AddScoped<IBusinessDocumentService, BusinessDocumentService>();
                 services.AddScoped<IBusinessAPIService, BusinessAPIService>();
                 services.AddScoped<IS3StorageService, S3StorageService>();

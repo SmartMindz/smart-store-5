@@ -21,7 +21,8 @@ namespace BizsolTech.Chatbot.Services
     {
         Task<bool> VerifyFacebookCredentials(int businessId, string pageId, string accessToken);
         Task<bool> VerifyOpenAICredentials(int businessId, string apiKey);
-        Task<bool> AddDocumentContent(int businessId, string content);
+        Task<string> AddDocumentContent(int businessId, string content);
+        Task<bool> DeleteDocumentContent(int businessId, string semanticRef);
 
         Task<List<Business>> GetBusinessAll();
         Task<Business> GetBusiness(int businessId);
@@ -165,7 +166,7 @@ namespace BizsolTech.Chatbot.Services
             }
         }
 
-        public async Task<bool> AddDocumentContent(int businessId, string documentContent)
+        public async Task<string> AddDocumentContent(int businessId, string documentContent)
         {
             try
             {
@@ -187,11 +188,42 @@ namespace BizsolTech.Chatbot.Services
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     var responseData = response.ResponseContent;
-                    return true;
+                    return responseData;
                 }
                 else
                 {
                     Logger.Error($"AddDocumentContent: API response:{response.StatusCode}");
+                    return string.Empty;
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+                return string.Empty;
+            }
+        }
+
+        public async Task<bool> DeleteDocumentContent(int businessId, string semanticRefKey)
+        {
+            try
+            {
+                var apiUrl = "/api/Business/RemoveMemory";
+
+                //parameters
+                Dictionary<string, string> parameters = new Dictionary<string, string>() {
+                    { "businessId", $"{businessId}" },
+                    { "fact", $"{semanticRefKey}" }
+                };
+
+                var response = await _apiHandler.GetAsync(apiUrl, parameters);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    return true;
+                }
+                else
+                {
+                    Logger.Error($"DeleteDocumentContent: API response:{response.StatusCode}");
                     return false;
                 }
             }

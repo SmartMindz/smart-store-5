@@ -1,29 +1,69 @@
-﻿@using BizsolTech.Chatbot.Models;
-@model BusinessListModel
+﻿﻿@using BizsolTech.Chatbot.Models;
+@model IEnumerable<BizsolTech.Chatbot.Models.BusinessModel>
 
 @{
-    ViewBag.Title = "Business";
-    Layout = "_AdminLayout";
-    Assets.BodyAttributes.AppendCssClass("spa-layout");
+    ViewBag.Title = "Business List";
+    Layout = "_Layout";
 }
 
-<form method="post" asp-action="List">
-    <div class="section-header">
-        <div class="title">
-            <i class="fa fa-user"></i>
-            Business
-        </div>
-        <div class="options">
-            <zone name="admin_button_toolbar_before" />
+<div class="container mt-4">
+    <h2>Business List</h2>
 
-            <zone name="admin_button_toolbar_after" />
-        </div>
-    </div>
-</form>
+    <table id="businessGrid" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Business Name</th>
+                <th>Collection Name</th>
+                <th>Description</th>
+                <th>Instruction</th>
+                <th>Documents</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var business in Model)
+            {
+                <tr>
+                    <td>
+                        <a href="@business.EditUrl">@business.BusinessName</a>
+                    </td>
+                    <td>@business.CollectionName</td>
+                    <td>@business.Description</td>
+                    <td>@business.Instruction</td>
+                    <td>
+                        @foreach (var document in business.Documents)
+                        {
+                            <div>
+                                <a href="@Url.Action("Download", "Business", new { documentId = document.Id })">@document.Name</a>
+                                <span class="delete-icon" onclick="deleteDocument('@Url.Action("DeleteDocument", "Business", new { documentId = document.Id })')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </span>
+                            </div>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
-@{
-    var gridViewData = new ViewDataDictionary(this.ViewData);
-    gridViewData["Parent"] = Model;
-}
+<script sm-target-zone="scripts" data-origin="business-grid">
+    $(document).ready(function () {
+        $('#businessGrid').DataTable({
+            // Add any additional configurations you need for DataTables
+        });
+    });
 
-<partial name="Grids/_Grid.Business" model="null" view-data="gridViewData" />
+    function deleteDocument(url) {
+        if (confirm("Are you sure you want to delete this document?")) {
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function () {
+                },
+                error: function () {
+                    alert('Error deleting document.');
+                }
+            });
+        }
+    }
+</script>

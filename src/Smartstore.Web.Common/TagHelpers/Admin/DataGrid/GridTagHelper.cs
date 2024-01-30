@@ -363,7 +363,7 @@ namespace Smartstore.Web.TagHelpers.Admin
 
             string antiforgeryToken = null;
             var isAjax = ViewContext.HttpContext.Request.IsAjax();
-            if (!isAjax &&  (!ViewContext.FormContext.CanRenderAtEndOfForm || !ViewContext.FormContext.HasAntiforgeryToken))
+            if (!isAjax && (!ViewContext.FormContext.CanRenderAtEndOfForm || !ViewContext.FormContext.HasAntiforgeryToken))
             {
                 var tokenSet = _antiforgery.GetTokens(ViewContext.HttpContext);
                 antiforgeryToken = tokenSet.RequestToken;

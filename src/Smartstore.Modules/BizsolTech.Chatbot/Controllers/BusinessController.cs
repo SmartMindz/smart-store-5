@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using AngleSharp.Dom;
 using BizsolTech.Chatbot.Configuration;
 using BizsolTech.Chatbot.Domain;
 using BizsolTech.Chatbot.Helpers;
@@ -36,6 +38,7 @@ namespace BizsolTech.Chatbot.Controllers
     {
         private readonly SmartDbContext _db;
         private readonly IBusinessService _businessService;
+        private readonly IBusinessChatService _businessChatService;
         private readonly IBusinessDocumentService _businessDocumentService;
         private readonly IBusinessAPIService _businessAPI;
         private readonly IS3StorageService _s3StorageService;
@@ -50,6 +53,7 @@ namespace BizsolTech.Chatbot.Controllers
 
         public BusinessController(SmartDbContext dbContext,
             IBusinessService businessService,
+            IBusinessChatService businessChatService,
             IBusinessDocumentService businessDocumentService,
             IBusinessAPIService businessAPIService,
             IS3StorageService s3StorageService,
@@ -63,6 +67,7 @@ namespace BizsolTech.Chatbot.Controllers
         {
             _db = dbContext;
             _businessService = businessService;
+            _businessChatService = businessChatService;
             _businessDocumentService = businessDocumentService;
             _businessAPI = businessAPIService;
             _s3StorageService = s3StorageService;
@@ -103,6 +108,14 @@ namespace BizsolTech.Chatbot.Controllers
             }
         }
 
+        private async Task<List<BusinessDocumentEntity>> PrepareBusinessDocuments(int businessId)
+        {
+            var businessDocuments = await _businessDocumentService.GetAllAsync();
+            businessDocuments = businessDocuments.Where(d => d.BusinessPageId == businessId).ToList();
+            if (businessDocuments.Count > 0) return businessDocuments;
+            else return new List<BusinessDocumentEntity>();
+        }
+
         #endregion
 
         [HttpGet]
@@ -114,6 +127,8 @@ namespace BizsolTech.Chatbot.Controllers
             {
                 var business = await _businessAPI.GetBusiness(id.Value);
                 PrepareBusinessModel(model, business);
+                //documents
+                model.Documents = await PrepareBusinessDocuments(model.Id);
                 return View(model);
             }
             else if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
@@ -135,6 +150,8 @@ namespace BizsolTech.Chatbot.Controllers
             {
                 var business = await _businessAPI.GetBusiness(id.Value);
                 PrepareBusinessModel(model, business);
+                //documents
+                model.Documents = await PrepareBusinessDocuments(model.Id);
                 return PartialView("_ChatInput", model);
             }
             else if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
@@ -278,6 +295,8 @@ namespace BizsolTech.Chatbot.Controllers
             {
                 var business = await _businessAPI.GetBusiness(id.Value);
                 PrepareBusinessModel(model, business);
+                //documents
+                model.Documents = await PrepareBusinessDocuments(model.Id);
                 return PartialView("_ChatConnection", model);
             }
             else if (session != null && session.TryGetObject<BusinessModel>("BusinessInput", out var inputModel))
@@ -333,19 +352,15 @@ namespace BizsolTech.Chatbot.Controllers
         }
 
         [HttpGet]
-        public IActionResult List()
+        public async Task<IActionResult> List()
         {
-            var model = new BusinessListModel();
-            return View(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> BusinessList(GridCommand command, BusinessListModel model)
-        {
+            //var model = new BusinessListModel();
+            //return View(model);
             try
             {
                 var customer = _workContext.CurrentCustomer;
                 var businessList = await _businessService.GetCustomerBusinessAll(customer);
+                var businessDocuments = await _businessDocumentService.GetAllAsync();
 
                 var rows = businessList.Select(b =>
                 new BusinessModel
@@ -368,6 +383,87 @@ namespace BizsolTech.Chatbot.Controllers
                     IsActive = true,
                     CreatedOnUtc = DateTime.Now.ToUniversalTime(),
                     UpdatedOnUtc = DateTime.Now.ToUniversalTime(),
+                    Documents = businessDocuments.Where(document => document.BusinessPageId == b.Id).ToList(),
+                    EditUrl = Url.Action(nameof(Index), "Business", new { id = b.Id })
+                }
+                ).ToList();
+
+                return View(rows);
+            }
+            catch (Exception e)
+            {
+                NotifyError(e.Message);
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteDocument(int documentId)
+        {
+            try
+            {
+                var document = await _businessDocumentService.Get(documentId);
+                if (document == null) { NotifyError("Document not found"); }
+                if (!string.IsNullOrEmpty(document.SemanticRef))
+                {
+                    var success = await _businessAPI.DeleteDocumentContent(document.BusinessPageId, document.SemanticRef);
+                    if (success)
+                    {
+                        document.Deleted = true;
+                        await _businessDocumentService.Update(document);
+                        NotifySuccess($"Document '{document.Name}' content deleted successfully");
+                        return Json(success);
+                    }
+                    else
+                    {
+                        NotifyError($"Failed to delete the document '{document.Name}'");
+                        return Json(false);
+                    }
+                }
+                else
+                {
+                    NotifyError($"Document '{document.Name}' is not yet processed at the moment and it is not deleted");
+                    return Json(false);
+                }
+            }
+            catch (Exception e)
+            {
+                NotifyError(e.Message);
+                return Json(false);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> BusinessList(GridCommand command, BusinessListModel model)
+        {
+            try
+            {
+                var customer = _workContext.CurrentCustomer;
+                var businessList = await _businessService.GetCustomerBusinessAll(customer);
+                var businessDocuments = await _businessDocumentService.GetAllAsync();
+
+                var rows = businessList.Select(b =>
+                new BusinessModel
+                {
+                    Id = b.Id,
+                    AdminId = 0,
+                    BusinessName = b.BusinessName,
+                    CollectionName = b.CollectionName,
+                    Description = b.Description,
+                    Instruction = b.Instruction,
+                    FBPageId = long.Parse(b.FBPageId),
+                    FBAccessToken = b.FBAccessToken,
+                    FBStatus = b.FBStatus,
+                    FBWebhookVerifyToken = b.FBWebhookVerifyToken,
+                    FBWebhookStatus = b.FBWebhookStatus,
+                    OpenAPIKey = b.OpenAPIKey,
+                    OpenAPIStatus = b.OpenAPIStatus,
+                    AzureOpenAPIKey = b.AzureOpenAPIKey,
+                    AzureOpenAPIStatus = b.AzureOpenAPIStatus,
+                    IsActive = true,
+                    CreatedOnUtc = DateTime.Now.ToUniversalTime(),
+                    UpdatedOnUtc = DateTime.Now.ToUniversalTime(),
+                    Documents = businessDocuments.Where(document => document.BusinessPageId == b.Id).ToList(),
                     EditUrl = Url.Action(nameof(Index), "Business", new { id = b.Id })
                 }
                 ).ToList();
@@ -440,5 +536,43 @@ namespace BizsolTech.Chatbot.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public IActionResult ChatList()
+        {
+            var model = new BusinessChatModel();
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChatList(GridCommand command, BusinessListModel model)
+        {
+            try
+            {
+                var chats = await _businessChatService.GetBusinessChatAll();
+
+                var rows = chats.Select(b =>
+                new BusinessChatModel
+                {
+                    Id = b.Id,
+                    BusinessId = b.BusinessId,
+                    SenderId = long.Parse(b.SenderId),
+                    Question = b.Question,
+                    Answer = b.Answer,
+                    CreatedAt = b.CreatedAt,
+                }
+                ).ToList();
+
+                return Ok(new GridModel<BusinessChatModel>
+                {
+                    Rows = rows,
+                    Total = chats.Count
+                });
+            }
+            catch (Exception e)
+            {
+                NotifyError(e.Message);
+                return BadRequest();
+            }
+        }
     }
 }

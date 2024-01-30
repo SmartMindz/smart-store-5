@@ -87,7 +87,7 @@ namespace BizsolTech.Chatbot.Filters
                         }
                         else if (customerBusinesses.Count > 1)
                         {
-                            context.Result = new RedirectToActionResult("List", "Product", new { area = "Admin" });
+                            context.Result = new RedirectResult("/Business/List");
                         }
                         else
                         {
