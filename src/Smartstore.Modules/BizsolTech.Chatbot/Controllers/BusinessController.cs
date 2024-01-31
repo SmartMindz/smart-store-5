@@ -328,7 +328,23 @@ namespace BizsolTech.Chatbot.Controllers
             var success = await _businessAPI.VerifyOpenAICredentials(model.Id, model.OpenAPIKey);
             //store params
             var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
-            NotifyError("Connection Not Established!");
+            if (success)
+            {
+                BusinessPageEntity businessPageEntity = new BusinessPageEntity();
+                businessPageEntity.CollectionName = "Collection_" + model.CollectionName;
+                businessPageEntity.FacebookPageId = Convert.ToString(model.FBPageId);
+                businessPageEntity.FacebookAccessToken = model.FBAccessToken;
+                businessPageEntity.FacebookAccessTokenStatus = model.FBStatus;
+                businessPageEntity.FacebookWebhookVerifyToken = model.FBWebhookVerifyToken;
+                businessPageEntity.FacebookWebhookVerifyTokenStatus = model.FBWebhookStatus;
+                businessPageEntity.OpenAIApiKey = model.OpenAPIKey;
+                businessPageEntity.OpenAIKeyStatus = model.OpenAPIStatus;
+                businessPageEntity.BusinessName = model.BusinessName;
+                businessPageEntity.Instructions = model.Instruction;
+                businessPageEntity.WelcomeMessage = model.WelcomeMessage;
+
+                await _businessService.Insert(businessPageEntity);
+            }
             return Json(new { success = success });
         }
 
@@ -336,7 +352,7 @@ namespace BizsolTech.Chatbot.Controllers
         public async Task<IActionResult> TestFacebookPageConnection(BusinessModel model, IFormCollection form)
         {
             var success = await _businessAPI.VerifyFacebookCredentials(model.Id, model.FBPageId.ToString(), model.FBAccessToken);
-            //store params
+            //store params            
             var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
             return Json(new { success = success });
         }
