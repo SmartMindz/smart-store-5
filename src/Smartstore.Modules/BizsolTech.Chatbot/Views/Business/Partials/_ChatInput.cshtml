@@ -61,6 +61,11 @@
 <form method="post" id="chat-input-form" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="BusinessId" />
+    <input type="hidden" asp-for="OpenAPIKey" />
+    <input type="hidden" asp-for="OpenAPIStatus" />
+    <input type="hidden" asp-for="FBPageId" />
+    <input type="hidden" asp-for="FBAccessToken" />
+    <input type="hidden" asp-for="FBStatus" />
     <div class="admin-content">
         <div class="col col-md-6">
             <div class="row">
@@ -181,7 +186,7 @@
             e.preventDefault();
 
             $.throbber.show({
-                message: "Uploading documents and data..."
+                message: "Saving..."
             });
 
             var formData = new FormData($(this)[0]);
@@ -204,10 +209,9 @@
                     if (response.success === true) {
                         dz.removeAllFiles(true); //remove the queue files
 
-                        $.throbber.hide();
-
                         window.location.href = response.redirectUrl;
                         console.log("Upload successful", response);
+                        $.throbber.hide();
                     } else {
                         $.throbber.hide();
                     }

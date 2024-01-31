@@ -96,22 +96,27 @@
             success: function (response) {
                 if (response.success) {
 
-                    $.throbber.hide();
-
                     testButton.hide();
 
                     statusDiv.html("<span style='color: green' title='Success'>Connected</span>");
                     nextButton.show();
-                } else {
+
+                    displayNotification("Open AI connection verified", "success");
                     $.throbber.hide();
+                } else {
                     statusDiv.html("<span style='color: red' title='Failed'>Failed</span>");
+
+                    displayNotification("Open AI connection verification error", "error");
+                    $.throbber.hide();
                 }
                 statusDiv.css("text-align", "right");
                 statusDiv.show();
             },
             error: function (xhr, status, error) {
-                $.throbber.hide();
                 console.error(xhr.responseText);
+                displayNotification(xhr.responseText, "error");
+
+                $.throbber.hide();
             }
         });
     }
