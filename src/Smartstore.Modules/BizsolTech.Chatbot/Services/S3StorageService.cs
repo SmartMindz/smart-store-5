@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
+using Microsoft.IdentityModel.Tokens;
+using NUglify.Helpers;
 
 namespace BizsolTech.Chatbot.Services
 {
@@ -81,6 +83,38 @@ namespace BizsolTech.Chatbot.Services
                     request.BucketName = bucketName;
                     request.Key = fileKey;
                     request.InputStream = stream;
+
+                    if (!prevFileKey.IsNullOrEmpty() || !prevFileKey.IsNullOrWhiteSpace())
+                    {
+                        // Check if the file with the given key already exists
+                        bool fileExists = await FileExistsAsync(client, bucketName, prevFileKey);
+                        // If the file exists, create a copy with a new key and delete the old file
+                        if (fileExists)
+                        {
+                            var copyFileRequest = new CopyObjectRequest
+                            {
+                                SourceBucket = bucketName,
+                                SourceKey = prevFileKey,
+                                DestinationBucket = bucketName,
+                                DestinationKey = fileKey + "_temp" // Temporary key for the copy
+                            };
+
+                            CopyObjectResponse copyFileResponse = await client.CopyObjectAsync(copyFileRequest);
+
+                            if (copyFileResponse.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                            {
+                                // Delete the old file
+                                var deleteFileRequest = new DeleteObjectRequest
+                                {
+                                    BucketName = bucketName,
+                                    Key = prevFileKey
+                                };
+                                DeleteObjectResponse fileDeleteResponse = await client.DeleteObjectAsync(deleteFileRequest);
+                            }
+                        }
+                    }
+
+                    // Upload the new file
                     utility.Upload(request);
 
                     if (isArchive)
@@ -167,6 +201,24 @@ namespace BizsolTech.Chatbot.Services
             {
                 Logger.Error(e);
                 return string.Empty;
+            }
+        }
+
+        private async Task<bool> FileExistsAsync(IAmazonS3 client, string bucketName, string key)
+        {
+            try
+            {
+                await client.GetObjectMetadataAsync(bucketName, key);
+                return true;
+            }
+            catch (AmazonS3Exception ex)
+            {
+                if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return false; // Object doesn't exist
+                }
+
+                throw; // Rethrow the exception for other error statuses
             }
         }
     }

@@ -276,7 +276,7 @@ namespace BizsolTech.Chatbot.Controllers
                             OpenAIFileID = "OPENAIFILEID"
                         };
 
-                        if (businessDocs.Any(d => d.Name == fileName && d.Extension == extension))
+                        if (businessDocs.Any(d => d.BusinessPageId == _response.Id && d.Name == fileName && d.Extension == extension))
                         {
                             var existingFile = businessDocs.FirstOrDefault(d => d.Name == fileName && d.Extension == extension);
                             var existingCRC = uint.Parse(existingFile?.CRC);
@@ -286,15 +286,16 @@ namespace BizsolTech.Chatbot.Controllers
                                 existingFile.Size = int.Parse(fileSize.ToString());
                                 existingFile.UpdateRequired = true;
                                 await _businessDocumentService.Update(existingFile);
+                                await _s3StorageService.AddDocument(existingFile, _response.BusinessName, fileName, existingFile.FileUrl, byteArray, false);
                             }
                         }
                         else
                         {
                             await _businessDocumentService.Insert(document);
+                            var success = await _s3StorageService.AddDocument(document, _response.BusinessName, fileName, null, byteArray, false);
                         }
                         model.Id = _response.Id;
                         model.Documents.Add(document);
-                        var success = await _s3StorageService.AddDocument(document, _response.BusinessName, fileName, "prevKey", byteArray, false);
                     }
 
                     var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
