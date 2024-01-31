@@ -183,7 +183,7 @@ namespace BizsolTech.Chatbot.Controllers
                     {
                         bName = model.BusinessName.Replace(" ", "_"); //xy_z
                     }
-                    
+
                     bName = model.BusinessName.Replace(" ", "_"); //xy_z
 
                     if (model.Id != 0 && customerBusinesses.Exists(b => b.Id.Equals(model.Id)))
@@ -198,7 +198,7 @@ namespace BizsolTech.Chatbot.Controllers
                         var success = await _businessAPI.UpdateBusiness(businessPage);
                         if (!success)
                         {
-                            NotifyError("Server error: Failed to update business. '{model.BusinessName}'");
+                            NotifyError("Server error: Failed to update business. " + model.BusinessName);
                             throw new Exception($"Server error: Failed to update business. '{model.BusinessName}'");
                         }
                         _response = businessPage;
@@ -207,7 +207,7 @@ namespace BizsolTech.Chatbot.Controllers
                     {
                         if (customerBusinesses.Any(b => b.BusinessName == bName))
                         {
-                            NotifyError("Server error: Business with name '{model.BusinessName}' already exists.");
+                            NotifyError("Server error: Business with name " + model.BusinessName + " already exists.");
                             throw new Exception($"Server error: Business with name '{model.BusinessName}' already exists.");
                         }
 
@@ -223,8 +223,8 @@ namespace BizsolTech.Chatbot.Controllers
                         _response = await _businessAPI.AddBusiness(businessPage);
                         if (_response == null)
                         {
-                            NotifyError("Server error: Failed to create business. '{model.BusinessName}'");
-                            throw new Exception($"Server error: Failed to create business. '{model.BusinessName}'");
+                            NotifyError("Server error: Failed to create business: " + model.BusinessName);
+                            throw new Exception($"Server error: Failed to create business: '{model.BusinessName}'");
                         }
 
                         var businessMapping = new BusinessPageMappingEntity();
@@ -282,7 +282,7 @@ namespace BizsolTech.Chatbot.Controllers
                     var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
 
                     string redirectUrl = Url.Action(nameof(ChatConnection));
-                    NotifySuccess("Business Name Added Successfully!");
+                    NotifySuccess("Business Name " + model.BusinessName + " Added Successfully!");
                     return Json(new { success = true, redirectUrl = redirectUrl });
                 }
                 else
@@ -328,6 +328,7 @@ namespace BizsolTech.Chatbot.Controllers
             var success = await _businessAPI.VerifyOpenAICredentials(model.Id, model.OpenAPIKey);
             //store params
             var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
+            NotifyError("Connection Not Established!");
             return Json(new { success = success });
         }
 
