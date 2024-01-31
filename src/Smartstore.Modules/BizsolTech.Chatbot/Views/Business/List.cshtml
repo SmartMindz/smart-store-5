@@ -6,20 +6,35 @@
     Layout = "_Layout";
 }
 
+<style>
+    #businessGrid th,
+    #businessGrid td {
+        width: 150px; /* not working dk why :( */
+    }
+</style>
+
 <div class="col col-md-12">
-    <h2>Business List</h2>
+    <div class="row" style="justify-content:space-between; padding-bottom:10px;">
+        <div class="col-md-2"> <h2>Business List</h2> </div>
+        <div class="col-md-2" style="text-align: right;">
+            <button id="add-business" class="btn btn-primary" type="button">Add new</button>
+        </div>
+    </div>
 
     <div class="table-responsive">
         <table id="businessGrid" class="table table-bordered table-striped">
             <thead>
                 <tr>
                     <th>Business Name</th>
+                    <th>Welcome Message</th>
                     <th>Description</th>
                     <th>Instruction</th>
                     <th>Open AI</th>
                     <th>Open AI Status</th>
+                    <th>Facebook Callback</th>
                     <th>Facebook Page Id</th>
                     <th>Facebook Access Token</th>
+                    <th>Facebook Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,12 +44,33 @@
                         <td>
                             <a href="@business.EditUrl">@business.BusinessName</a>
                         </td>
+                        <td>@business.WelcomeMessage</td>
                         <td>@business.Description</td>
                         <td>@business.Instruction</td>
                         <td>@business.OpenAPIKey</td>
-                        <td>@business.OpenAPIStatus</td>
+                        <td>
+                            @if (business.OpenAPIStatus)
+                            {
+                                <i class="fas fa-check text-success"></i>
+                            }
+                            else
+                            {
+                                <i class="fas fa-times text-danger"></i>
+                            }
+                        </td>
+                        <td>@business.FBCallbackUrl</td>
                         <td>@business.FBPageId</td>
                         <td>@business.FBAccessToken</td>
+                        <td>
+                            @if (business.FBStatus)
+                            {
+                                <i class="fas fa-check text-success"></i>
+                            }
+                            else
+                            {
+                                <i class="fas fa-times text-danger"></i>
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -44,8 +80,9 @@
 
 <script sm-target-zone="scripts" data-origin="business-grid">
     $(document).ready(function () {
-        $('#businessGrid').DataTable({
-            // Add any additional configurations you need for DataTables
+
+        $('#add-business').on('click', function () {
+            window.location.href = '@Url.Action("Index", "Business")';
         });
     });
 </script>

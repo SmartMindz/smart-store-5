@@ -18,6 +18,7 @@
 <form method="post" id="chat-response-form">
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="BusinessId" />
+    <input type="hidden" asp-for="BusinessName" />
     <input type="hidden" asp-for="WelcomeMessage" />
     <input type="hidden" asp-for="Description" />
     <input type="hidden" asp-for="Instruction" />
@@ -31,6 +32,15 @@
             </div>
             <div class="row" style="justify-content: flex-end;">
                 <div class="col-md-3" id="key-status-div" style="display:none;">
+                </div>
+            </div>
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="FBCallbackUrl" />
+                </div>
+                <div class="adminData col-md-9">
+                    <input class="key" asp-for="FBCallbackUrl" placeholder="Facebook page id" disabled />
+                    <span asp-validation-for="FBCallbackUrl"></span>
                 </div>
             </div>
             <div class="row">
@@ -58,12 +68,11 @@
             </div>
             <div class="row" style="justify-content: flex-end;">
                 <div class="col-md-2" style="text-align: right;">
-                    <button id="btn-finish" class="btn btn-primary" type="button" style="display:none" onclick="finish()">Finish</button>
+                    <button id="btn-finish" class="btn btn-primary" type="button" style="display:none">Finish</button>
                 </div>
             </div>
         </div>
         <div class="col col-md-6">
-
         </div>
     </div>
 </form>
@@ -73,8 +82,16 @@
     var testButton = $("#btn-test");
     var nextButton = $("#btn-finish");
 
+    $(document).ready(function () {
+        checkAndShowConnectionButton();
+    });
+
     $(".key").on("input", function () {
         testButton.show();
+    });
+
+    nextButton.on('click', function () {
+        window.location.href = '@Url.Action("List", "Business")';
     });
 
     function testConnection() {
@@ -84,7 +101,6 @@
         });
 
         var formData = $("#chat-response-form").serialize();
-        debugger
         $.ajax({
             url: '@Url.Action("TestFacebookPageConnection")',
             type: 'POST',
@@ -117,7 +133,17 @@
         });
     }
 
-    function finish(){
-        window.location.href = '@Url.Action("List")';
+    function checkAndShowConnectionButton() {
+        var hasValue = false;
+        $(".key").each(function () {
+            if ($(this).val()) {
+                hasValue = true;
+                return false; // exit the loop if any field has a value
+            }
+        });
+
+        if (hasValue) {
+            testButton.show();
+        }
     }
 </script>

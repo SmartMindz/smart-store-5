@@ -18,6 +18,7 @@
 <form method="post" id="chat-connection-form">
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="BusinessId" />
+    <input type="hidden" asp-for="BusinessName" />
     <input type="hidden" asp-for="WelcomeMessage" />
     <input type="hidden" asp-for="Description" />
     <input type="hidden" asp-for="Instruction" />
@@ -25,7 +26,7 @@
     <div class="admin-content">
         <div class="col col-md-6">
             <div class="row" style="padding-left: 15px;">
-                <a href="@Url.Action("Index", "Business")" class="btn btn-outline-secondary btn-sm btn-icon mr-3" title="Back to step one"><i class="fa fa-arrow-left"></i></a>
+                <a href="@Url.Action("Index", "Business", new {id = Model.Id})" class="btn btn-outline-secondary btn-sm btn-icon mr-3" title="Back to step one"><i class="fa fa-arrow-left"></i></a>
             </div>
             <div class="row" style="justify-content: flex-end;">
                 <div class="col-md-3" id="key-status-div" style="display:none;">
@@ -36,7 +37,7 @@
                     <smart-label asp-for="OpenAPIKey" />
                 </div>
                 <div class="adminData col-md-9">
-                    <input class="key" asp-for="OpenAPIKey" placeholder="OpenAI Key"/>
+                    <input class="key" asp-for="OpenAPIKey" placeholder="OpenAI Key" />
                     <span asp-validation-for="OpenAPIKey"></span>
                 </div>
             </div>
@@ -52,7 +53,7 @@
                     <smart-label asp-for="AzureOpenAPIKey" />
                 </div>
                 <div class="adminData col-md-9">
-                    <input class="key" asp-for="AzureOpenAPIKey" placeholder="Azure OpenAI Key"/>
+                    <input class="key" asp-for="AzureOpenAPIKey" placeholder="Azure OpenAI Key" />
                     <span asp-validation-for="AzureOpenAPIKey"></span>
                 </div>
             </div>
@@ -63,12 +64,11 @@
             </div>
             <div class="row" style="justify-content: flex-end;">
                 <div class="col-md-2" style="text-align: right;">
-                    <a href="@Url.Action("ChatResponse", "Business")" class="btn btn-primary" style="display:none" id="btn-next">Next</a>
+                    <a href="@Url.Action("ChatResponse", "Business", new { id = Model.Id })" class="btn btn-primary" style="display:none" id="btn-next">Next</a>
                 </div>
             </div>
         </div>
         <div class="col col-md-6">
-
         </div>
     </div>
 </form>
@@ -76,6 +76,10 @@
     var statusDiv = $("#key-status-div");
     var testButton = $("#btn-test");
     var nextButton = $("#btn-next");
+
+    $(document).ready(function () {
+        checkAndShowConnectionButton();
+    });
 
     $(".key").on("input", function () {
         testButton.show();
@@ -88,7 +92,6 @@
         });
 
         var formData = $("#chat-connection-form").serialize();
-        debugger
         $.ajax({
             url: '@Url.Action("TestOpenAIConnection")',
             type: 'POST',
@@ -119,5 +122,19 @@
                 $.throbber.hide();
             }
         });
+    }
+
+    function checkAndShowConnectionButton() {
+        var hasValue = false;
+        $(".key").each(function () {
+            if ($(this).val()) {
+                hasValue = true;
+                return false; // exit the loop if any field has a value
+            }
+        });
+
+        if (hasValue) {
+            testButton.show();
+        }
     }
 </script>

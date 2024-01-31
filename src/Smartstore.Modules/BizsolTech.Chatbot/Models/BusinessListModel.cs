@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using BizsolTech.Chatbot.Domain;
 using Smartstore.Web.Modelling;
 
@@ -22,6 +23,7 @@ namespace BizsolTech.Chatbot.Models
         public bool FBStatus { get; set; }
         public string FBWebhookVerifyToken { get; set; }
         public bool FBWebhookStatus { get; set; }
+        public string FBCallbackUrl { get; set; }
         [LocalizedDisplay("Chatbot.Fields.OpenAPIKey")]
         public string OpenAPIKey { get; set; }
         public bool OpenAPIStatus { get; set; }
@@ -33,15 +35,19 @@ namespace BizsolTech.Chatbot.Models
         public DateTime UpdatedOnUtc { get; set; }
         [LocalizedDisplay("Chatbot.Fields.BusinessName")]
         public string BusinessId { get; set; }
+
+        [Required(ErrorMessage = "Business name is required.")]
         public string BusinessName { get; set; }
         public string CollectionName { get; set; }
         [LocalizedDisplay("Chatbot.Fields.WelcomeMessage")]
+        [Required(ErrorMessage = "Welcome message is required.")]
         public string WelcomeMessage { get; set; }
 
         [LocalizedDisplay("Chatbot.Fields.BusinessDescription")]
         public string Description { get; set; }
 
         [LocalizedDisplay("Chatbot.Fields.Instructions")]
+        [Required(ErrorMessage = "Instructions are required.")]
         public string Instruction { get; set; }
 
         [LocalizedDisplay("Chatbot.Fields.Documents")]

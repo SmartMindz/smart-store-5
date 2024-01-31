@@ -81,7 +81,11 @@ namespace BizsolTech.Chatbot.Controllers
         }
 
         #region Utilities
-
+        private string GetFacebookCallbackUrl()
+        {
+            var baseDomainUrl = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}";
+            return baseDomainUrl + "/api/webhook?businessId=";
+        }
         private void PrepareBusinessModel(BusinessModel model, Business entity)
         {
             if (entity == null) { return; }
@@ -92,6 +96,7 @@ namespace BizsolTech.Chatbot.Controllers
                 model.BusinessName = entity.BusinessName;
                 model.Description = entity.Description;
                 model.Instruction = entity.Instruction;
+                model.WelcomeMessage = entity.WelcomeMessage;
                 model.CollectionName = entity.CollectionName;
                 model.FBPageId = long.Parse(entity.FBPageId);
                 model.FBAccessToken = entity.FBAccessToken;
@@ -105,6 +110,9 @@ namespace BizsolTech.Chatbot.Controllers
                 model.IsActive = true;
                 //model.CreatedOnUtc = entity.CreatedOnUtc;
                 //model.UpdatedOnUtc = entity.UpdatedOnUtc;
+
+                //callback
+                model.FBCallbackUrl = GetFacebookCallbackUrl() + entity.Id;
             }
         }
 
@@ -185,7 +193,7 @@ namespace BizsolTech.Chatbot.Controllers
                     {
                         bName = model.BusinessName.Replace(" ", "_"); //xy_z
                     }
-                    
+
                     bName = model.BusinessName.Replace(" ", "_"); //xy_z
 
                     if (model.Id != 0 && customerBusinesses.Exists(b => b.Id.Equals(model.Id)))
@@ -201,7 +209,7 @@ namespace BizsolTech.Chatbot.Controllers
                         if (!success)
                         {
                             NotifyError($"Server error: Failed to update business. '{model.BusinessName}'");
-                            return Json(new { success = false});
+                            return Json(new { success = false });
                         }
                         else
                         {
@@ -378,6 +386,13 @@ namespace BizsolTech.Chatbot.Controllers
             //return View(model);
             try
             {
+                //remove business inputs from session
+                var session = _httpContextAccessor.HttpContext?.Session;
+                if (session != null)
+                {
+                    var removed = session.TryRemove("BusinessInput");
+                }
+
                 var customer = _workContext.CurrentCustomer;
                 var businessList = await _businessService.GetCustomerBusinessAll(customer);
 
@@ -387,6 +402,7 @@ namespace BizsolTech.Chatbot.Controllers
                     Id = b.Id,
                     AdminId = 0,
                     BusinessName = b.BusinessName,
+                    WelcomeMessage = b.WelcomeMessage,
                     CollectionName = b.CollectionName,
                     Description = b.Description,
                     Instruction = b.Instruction,
@@ -395,6 +411,7 @@ namespace BizsolTech.Chatbot.Controllers
                     FBStatus = b.FBStatus,
                     FBWebhookVerifyToken = b.FBWebhookVerifyToken,
                     FBWebhookStatus = b.FBWebhookStatus,
+                    FBCallbackUrl = GetFacebookCallbackUrl() + b.Id,
                     OpenAPIKey = b.OpenAPIKey,
                     OpenAPIStatus = b.OpenAPIStatus,
                     AzureOpenAPIKey = b.AzureOpenAPIKey,
