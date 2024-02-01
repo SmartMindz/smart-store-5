@@ -9,6 +9,7 @@ namespace BizsolTech.Chatbot.Domain
     public class BusinessDocumentEntity : BaseEntity, ISoftDeletable, IActivatable, IAuditable
     {
         public int BusinessPageId { get; set; }
+        public int? BusinessMemoryId { get; set; }
         public string SemanticRef { get; set; }
         public required string Name { get; set; }
         public required string FileUrl { get; set; }

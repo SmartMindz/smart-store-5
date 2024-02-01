@@ -442,12 +442,12 @@ namespace BizsolTech.Chatbot.Controllers
                 if (document == null) { NotifyError("Document not found"); }
                 if (!string.IsNullOrEmpty(document.SemanticRef))
                 {
-                    var success = await _businessAPI.DeleteDocumentContent(document.BusinessPageId, document.SemanticRef);
+                    var success = await _businessAPI.DeleteDocumentContent(document.BusinessPageId, document.BusinessMemoryId.Value);
                     if (success)
                     {
                         document.Deleted = true;
                         await _businessDocumentService.Update(document);
-                        NotifySuccess($"Document '{document.Name}' content deleted successfully");
+                        NotifySuccess($"Document '{document.Name}' deleted successfully");
                         return Json(success);
                     }
                     else

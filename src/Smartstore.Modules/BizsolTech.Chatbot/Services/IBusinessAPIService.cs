@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using NUglify.JavaScript;
 using Microsoft.Extensions.Logging;
 using System;
+using BizsolTech.Chatbot.Models.Business;
 
 namespace BizsolTech.Chatbot.Services
 {
@@ -21,8 +22,8 @@ namespace BizsolTech.Chatbot.Services
     {
         Task<bool> VerifyFacebookCredentials(int businessId, string pageId, string accessToken);
         Task<bool> VerifyOpenAICredentials(int businessId, string apiKey);
-        Task<string> AddDocumentContent(int businessId, string content);
-        Task<bool> DeleteDocumentContent(int businessId, string semanticRef);
+        Task<BusinessMemory> AddDocumentContent(int businessId, string content);
+        Task<bool> DeleteDocumentContent(int businessId, int businessMemoryId);
 
         Task<List<Business>> GetBusinessAll();
         Task<Business> GetBusiness(int businessId);
@@ -166,53 +167,50 @@ namespace BizsolTech.Chatbot.Services
             }
         }
 
-        public async Task<string> AddDocumentContent(int businessId, string documentContent)
+        public async Task<BusinessMemory> AddDocumentContent(int businessId, string documentContent)
         {
             try
             {
-                var apiUrl = "/api/Business/AddMemory";
+                var apiUrl = "/api/BusinessMemory/Add";
 
                 var requestBody = new
                 {
+                    businessId = businessId,
                     fact = "fact",
                     text = documentContent
                 };
 
-                //parameters
-                Dictionary<string, string> parameters = new Dictionary<string, string>() {
-                    { "businessId", $"{businessId}" }
-                };
-
-                var response = await _apiHandler.PostAsync(apiUrl, requestBody, parameters);
+                var response = await _apiHandler.PostAsync(apiUrl, requestBody);
 
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     var responseData = response.ResponseContent;
-                    return responseData;
+                    var businessMemory = JsonConvert.DeserializeObject<BusinessMemory>(responseData);
+                    return businessMemory;
                 }
                 else
                 {
                     Logger.Error($"AddDocumentContent: API response:{response.StatusCode}");
-                    return string.Empty;
+                    return null;
                 }
             }
             catch (Exception e)
             {
                 Logger.Error(e);
-                return string.Empty;
+                return null;
             }
         }
 
-        public async Task<bool> DeleteDocumentContent(int businessId, string semanticRefKey)
+        public async Task<bool> DeleteDocumentContent(int businessId, int businessMemoryId)
         {
             try
             {
-                var apiUrl = "/api/Business/RemoveMemory";
+                var apiUrl = "/api/BusinessMemory/Delete";
 
                 //parameters
                 Dictionary<string, string> parameters = new Dictionary<string, string>() {
-                    { "businessId", $"{businessId}" },
-                    { "fact", $"{semanticRefKey}" }
+                    { "BusinessId", $"{businessId}" },
+                    { "BusinessMemoryId", $"{businessMemoryId}" }
                 };
 
                 var response = await _apiHandler.GetAsync(apiUrl, parameters);

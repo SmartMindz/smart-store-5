@@ -30,17 +30,18 @@ namespace BizsolTech.Chatbot.Tasks
         public async Task Run(TaskExecutionContext ctx, CancellationToken cancelToken = default)
         {
             var documents = await _businessDocumentService.GetAllAsync();
-            documents = documents.Where(x => x.UpdateRequired).ToList();
+            documents = documents.Where(x => x.UpdateRequired && !x.Deleted).ToList();
             foreach (var document in documents)
             {
                 var content = await _s3StorageService.ReadFileFromS3(document.FileUrl);
 
                 if (!string.IsNullOrEmpty(content))
                 {
-                    var id = await _apiService.AddDocumentContent(document.BusinessPageId, content);
-                    if(!id.IsNullOrEmpty() || !id.IsNullOrWhiteSpace())
+                    var businessMemory = await _apiService.AddDocumentContent(document.BusinessPageId, content);
+                    if(businessMemory != null)
                     {
-                        document.SemanticRef = id;
+                        document.BusinessMemoryId = businessMemory.Id;
+                        document.SemanticRef = businessMemory.Reference;
                         document.UpdateRequired = false;
                         await _businessDocumentService.Update(document);
                     }
