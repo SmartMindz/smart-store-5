@@ -1,11 +1,50 @@
 ﻿﻿@using BizsolTech.Chatbot.Models;
-@model BusinessChatModel
+@model IEnumerable<BizsolTech.Chatbot.Models.BusinessChatModel>
 
 @{
     ViewBag.Title = "Business Chat";
-    Layout = "~/modules/BizsolTech.Chatbot/Views/Shared/Layout/_LayoutRoot.cshtml";
+    Layout = "_Layout";
 }
 
-<div class="page-body">
-    <partial name="Grids/_Grid.BusinessChat" model="null" />
+<widget target-zone="stylesheets">
+    <link rel="stylesheet" href="@Url.Content("~/modules/BizsolTech.Chatbot/css/jquery.dataTables.min.css")" />
+</widget>
+<widget target-zone="head_scripts">
+    <script src="@Url.Content("~/modules/BizsolTech.Chatbot/js/jquery.dataTables.min.js")"></script>
+</widget>
+
+<div class="col col-md-12">
+    <div class="row" style="justify-content:space-between; padding-bottom:10px;">
+        <div class="col-md-2"> <h2>Business Chats</h2> </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="chatGrid" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Sender Id</th>
+                    <th>Question</th>
+                    <th>Answer</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var chat in Model)
+                {
+                    <tr>
+                        <td>@chat.SenderId</td>
+                        <td>@chat.Question</td>
+                        <td>@chat.Answer</td>
+                        <td>@chat.CreatedAt</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<script>
+    $(document).ready(function () {
+        $('#chatGrid').DataTable();
+    });
+</script>

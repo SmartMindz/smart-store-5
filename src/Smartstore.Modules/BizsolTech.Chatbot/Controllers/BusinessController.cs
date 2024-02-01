@@ -434,6 +434,23 @@ namespace BizsolTech.Chatbot.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> DeleteBusiness(int businessId)
+        {
+            try
+            {
+                var business = await _businessAPI.GetBusiness(businessId);
+                if (business == null)
+                {
+                    NotifyError($"Business not found");
+                    return BadRequest();
+                }
+                return Json(true);
+
+            }
+            catch (Exception e) { NotifyError(e.Message); return BadRequest(); }
+        }
+
+        [HttpGet]
         public async Task<IActionResult> DeleteDocument(int documentId)
         {
             try
@@ -573,10 +590,21 @@ namespace BizsolTech.Chatbot.Controllers
         }
 
         [HttpGet]
-        public IActionResult ChatList()
+        public async Task<IActionResult> ChatList()
         {
-            var model = new BusinessChatModel();
-            return View(model);
+            var chats = await _businessChatService.GetBusinessChatAll();
+            var rows = chats.Select(b =>
+                new BusinessChatModel
+                {
+                    Id = b.Id,
+                    BusinessId = b.BusinessId,
+                    SenderId = long.Parse(b.SenderId),
+                    Question = b.Question,
+                    Answer = b.Answer,
+                    CreatedAt = b.CreatedAt,
+                }
+                ).ToList();
+            return View(rows);
         }
 
         [HttpPost]
