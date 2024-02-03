@@ -14,6 +14,7 @@ namespace BizsolTech.Chatbot.Models
         public long SenderId { get; set; }
         public string Question { get; set; }
         public string Answer { get; set; }
+        public string BusinessName { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

@@ -17,9 +17,22 @@
     <div class="row" style="justify-content:space-between; padding-bottom:10px;">
         <div class="col-md-2"> <h2>Business Chats</h2> </div>
     </div>
-
-    <div class="table-responsive">
-        <table id="chatGrid" class="table table-bordered table-striped">
+    <div class="col-md-4">
+        @* Dropdown for selecting the business *@
+        @*<select id="businessDropdown">
+             @foreach (var chat in Model)
+            {
+                <option value="@chat.BusinessId">BusinessName</option>
+            } 
+        </select>*@
+        <select id="businessDropdown">
+            <option value="1">BusinessName1</option>
+            <option value="12">BusinessName11</option>
+            <!-- Add more options as needed -->
+        </select>
+    </div>
+    <div class="table-responsive" style="display:none">
+        <table id="chatGrid" style="display:none" class="table table-bordered table-striped">
             <thead>
                 <tr>
                     <th>Sender Id</th>
@@ -46,5 +59,44 @@
 <script>
     $(document).ready(function () {
         $('#chatGrid').DataTable();
+    });
+    $(document).ready(function () {
+        // Initialize DataTable
+        var dataTable = $('#chatGrid').DataTable();
+        
+        // Handle dropdown change event
+        $('#businessDropdown').change(function () {
+            var selectedBusinessId = $(this).val();
+            if (selectedBusinessId) {
+                // Make an AJAX call to load chats for the selected business
+                $.ajax({
+                    url: 'GetBusinessChatList',
+                    type: 'GET',
+                    data: { businessId: selectedBusinessId },
+                    success: function (data) {
+                        // Clear existing rows in DataTable
+                        dataTable.clear();
+
+                        // Extract and add new rows to DataTable
+                        data.forEach(function (item) {
+                            dataTable.row.add([
+                                item.SenderId,
+                                item.Question,
+                                item.Answer,
+                                item.CreatedAt
+                            ]);
+                        });
+
+                        // Draw the DataTable
+                        dataTable.draw();
+                        $('#chatGrid').show();
+                        $('.table-responsive').show();
+                    },
+                    error: function () {
+                        console.error('Failed to load chats for the selected business.');
+                    }
+                });
+            }
+        });
     });
 </script>

@@ -14,6 +14,7 @@ using BizsolTech.Models.Business;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -31,6 +32,7 @@ using Smartstore.Web.Modelling.Settings;
 using Smartstore.Web.Models.DataGrid;
 using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static Smartstore.Core.Security.Permissions;
 
 namespace BizsolTech.Chatbot.Controllers
 {
@@ -604,11 +606,30 @@ namespace BizsolTech.Chatbot.Controllers
                     CreatedAt = b.CreatedAt,
                 }
                 ).ToList();
+            var customer = _workContext.CurrentCustomer;
+            var businesses = await _businessService.GetCustomerBusinessAll(customer);
+            ViewBag.Businesses = new SelectList(businesses, "Id", "BusinessName");
             return View(rows);
         }
-
+        [HttpGet]
+        public async Task<JsonResult> GetBusinessChatList(int businessId)
+        {
+            var chats = await _businessChatService.GetBusinessChatByBusinessId(businessId);
+            var rows = chats.Select(b =>
+                new BusinessChatModel
+                {
+                    Id = b.Id,
+                    BusinessId = b.BusinessId,
+                    SenderId = long.Parse(b.SenderId),
+                    Question = b.Question,
+                    Answer = b.Answer,
+                    CreatedAt = b.CreatedAt,
+                }
+            ).ToList();
+            return new JsonResult(rows);
+        }
         [HttpPost]
-        public async Task<IActionResult> ChatList(GridCommand command, BusinessListModel model)
+        public async Task<IActionResult> ChatList1(GridCommand command, BusinessListModel model)
         {
             try
             {
