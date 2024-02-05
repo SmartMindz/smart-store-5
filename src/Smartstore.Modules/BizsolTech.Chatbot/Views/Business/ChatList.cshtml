@@ -54,7 +54,7 @@
         $("#businessDropdown option:first").attr("selected", "selected");
         // Initialize DataTable
         var dataTable = $('#chatGrid').DataTable({
-            ajax: '@Url.Action("GetBusinessChatList", "Business")' + '?businessId=1', //+ $("#businessDropdown").val(),
+            ajax: '@Url.Action("GetBusinessChatList", "Business")' + '?businessId=' + $("#businessDropdown").val(),
             columns: [
                 {
                     className: 'dt-control',

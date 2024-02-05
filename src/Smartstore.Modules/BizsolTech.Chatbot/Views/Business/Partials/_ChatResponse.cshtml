@@ -39,8 +39,25 @@
                     <smart-label asp-for="FBCallbackUrl" />
                 </div>
                 <div class="adminData col-md-9">
-                    <input class="key" asp-for="FBCallbackUrl" placeholder="Facebook page id" disabled />
-                    <span asp-validation-for="FBCallbackUrl"></span>
+                    <div class="input-container" data-clipboard-text="@Model.FBCallbackUrl">
+                        <div class="input-group">
+                            <input class="key form-control" asp-for="FBCallbackUrl" placeholder="Facebook Callback Url" disabled />
+                            <button class="btn btn-secondary btn-sm clipboard-btn" type="button" style="display:none"><i class="fas fa-copy"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="FBWebhookVerifyToken" />
+                </div>
+                <div class="adminData col-md-9">
+                    <div class="input-container" data-clipboard-text="@Model.FBWebhookVerifyToken">
+                        <div class="input-group">
+                            <input class="key form-control" asp-for="FBWebhookVerifyToken" placeholder="Facebook Webhook Verify Token" disabled />
+                            <button class="btn btn-secondary btn-sm clipboard-btn" type="button" style="display:none"><i class="fas fa-copy"></i></button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row">
@@ -84,6 +101,21 @@
 
     $(document).ready(function () {
         checkAndShowConnectionButton();
+
+        $('.input-container').hover(
+            function () {
+                $(this).find('.clipboard-btn').show();
+            },
+            function () {
+                $(this).find('.clipboard-btn').hide();
+            }
+        );
+
+        $('.clipboard-btn').on('click', function (event) {
+            event.stopPropagation(); // Prevents the input container click event
+            var clipboardText = $(this).closest('.input-container').data('clipboard-text');
+            copyToClipboard(clipboardText);
+        });
     });
 
     $(".key").on("input", function () {
@@ -145,5 +177,13 @@
         if (hasValue) {
             testButton.show();
         }
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function () {
+            displayNotification('Text successfully copied to clipboard', 'warning');
+        }).catch(function (err) {
+            displayNotification('Unable to copy text to clipboard', 'error');
+        });
     }
 </script>

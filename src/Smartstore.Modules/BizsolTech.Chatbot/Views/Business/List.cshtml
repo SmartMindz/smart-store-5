@@ -9,7 +9,7 @@
 <style>
     #businessGrid th,
     #businessGrid td {
-        width: 150px; /* not working dk why :( */
+        width: 100px; /* not working dk why :( */
     }
 </style>
 
@@ -33,13 +33,9 @@
             <thead>
                 <tr>
                     <th>Business Name</th>
-                    <th>Open AI Key</th>
                     <th>Open AI Status</th>
                     <th>Facebook Callback</th>
-                    <th>Facebook Verify Token</th>
-                    <th>Facebook Page Id</th>
-                    <th>Facebook Access Token</th>
-                    <th>Facebook Status</th>
+                    <th>Messenger Status</th>
                     <th>&nbsp;</th>
                 </tr>
             </thead>
@@ -50,7 +46,6 @@
                         <td>
                             <a href="@business.EditUrl">@business.BusinessName</a>
                         </td>
-                        <td>@business.OpenAPIKey</td>
                         <td>
                             @if (business.OpenAPIStatus)
                             {
@@ -62,9 +57,6 @@
                             }
                         </td>
                         <td>@business.FBCallbackUrl</td>
-                        <td>@business.FBWebhookVerifyToken</td>
-                        <td>@business.FBPageId</td>
-                        <td>@business.FBAccessToken</td>
                         <td>
                             @if (business.FBStatus)
                             {
@@ -94,7 +86,7 @@
         var businessGrid = $('#businessGrid').DataTable();
 
         // Add copy-to-clipboard button for each row in the "Facebook Callback" column
-        $('#businessGrid tbody').on('mouseenter', 'td:nth-child(4)', function () {
+        $('#businessGrid tbody').on('mouseenter', 'td:nth-child(3)', function () {
             var cell = businessGrid.cell(this);
             var cellValue = cell.data();
             var copyButton = $('<button class="btn btn-secondary btn-sm"><i class="fas fa-copy"></i></button>');
@@ -109,7 +101,7 @@
             });
         });
 
-        $('#businessGrid tbody').on('mouseleave', 'td:nth-child(4)', function () {
+        $('#businessGrid tbody').on('mouseleave', 'td:nth-child(3)', function () {
             var cell = businessGrid.cell(this);
             var cellValue = cell.data();
 

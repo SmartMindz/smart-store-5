@@ -167,7 +167,7 @@ namespace BizsolTech.Chatbot.Services
             }
         }
 
-        public async Task<BusinessMemory> AddDocumentContent(int businessId, string documentContent)
+        public async Task<BusinessMemory> AddDocumentContent(int id, string documentContent)
         {
             try
             {
@@ -175,7 +175,7 @@ namespace BizsolTech.Chatbot.Services
 
                 var requestBody = new
                 {
-                    businessId = businessId,
+                    businessId = id,
                     fact = "fact",
                     text = documentContent
                 };

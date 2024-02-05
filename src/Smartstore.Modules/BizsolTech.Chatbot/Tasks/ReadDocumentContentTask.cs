@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BizsolTech.Chatbot.Helpers;
@@ -29,27 +30,34 @@ namespace BizsolTech.Chatbot.Tasks
         public ILogger Logger { get; set; } = NullLogger.Instance;
         public async Task Run(TaskExecutionContext ctx, CancellationToken cancelToken = default)
         {
-            var documents = await _businessDocumentService.GetAllAsync();
-            documents = documents.Where(x => x.UpdateRequired && !x.Deleted).ToList();
-            foreach (var document in documents)
+            try
             {
-                var content = await _s3StorageService.ReadFileFromS3(document.FileUrl);
-
-                if (!string.IsNullOrEmpty(content))
+                var documents = await _businessDocumentService.GetAllAsync();
+                documents = documents.Where(x => x.UpdateRequired && !x.Deleted).ToList();
+                foreach (var document in documents)
                 {
-                    var businessMemory = await _apiService.AddDocumentContent(document.BusinessPageId, content);
-                    if(businessMemory != null)
+                    var content = await _s3StorageService.ReadFileFromS3(document.FileUrl);
+
+                    if (!string.IsNullOrEmpty(content))
                     {
-                        document.BusinessMemoryId = businessMemory.Id;
-                        document.SemanticRef = businessMemory.Reference;
-                        document.UpdateRequired = false;
-                        await _businessDocumentService.Update(document);
+                        var businessMemory = await _apiService.AddDocumentContent(document.BusinessPageId, content);
+                        if (businessMemory != null)
+                        {
+                            document.BusinessMemoryId = businessMemory.Id;
+                            document.SemanticRef = businessMemory.Reference;
+                            document.UpdateRequired = false;
+                            await _businessDocumentService.Update(document);
+                        }
+                    }
+                    else
+                    {
+                        Logger.Error($"S3Bucket: Read file content error. Doc {document.Name}");
                     }
                 }
-                else
-                {
-                    Logger.Error($"S3Bucket: Read file content error. Doc {document.Name}");
-                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"{nameof(ReadDocumentContentTask)} - Error: {ex.Message}");
             }
         }
     }
