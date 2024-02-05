@@ -43,5 +43,14 @@
                 <span asp-validation-for="SecretKey"></span>
             </div>
         </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="FacebookCallbackUrlBase" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="FacebookCallbackUrlBase" />
+                <span asp-validation-for="FacebookCallbackUrlBase"></span>
+            </div>
+        </div>
     </div>
 </form>

@@ -1,9 +1,8 @@
-﻿﻿@using BizsolTech.Chatbot.Models;
-@model IEnumerable<BizsolTech.Chatbot.Models.BusinessChatModel>
-
-@{
+﻿@{
     ViewBag.Title = "Business Chat";
     Layout = "_Layout";
+
+    var businesses = ViewBag.Businesses as SelectList;
 }
 
 <widget target-zone="stylesheets">
@@ -18,23 +17,18 @@
         <div class="col-md-2"> <h2>Business Chats</h2> </div>
     </div>
     <div class="col-md-4">
-        @* Dropdown for selecting the business *@
-        @*<select id="businessDropdown">
-             @foreach (var chat in Model)
-            {
-                <option value="@chat.BusinessId">BusinessName</option>
-            } 
-        </select>*@
         <select id="businessDropdown">
-            <option value="1">BusinessName1</option>
-            <option value="12">BusinessName11</option>
-            <!-- Add more options as needed -->
+            @foreach (var item in businesses)
+            {
+                <option value="@item.Value">@item.Text</option>
+            }
         </select>
     </div>
-    <div class="table-responsive" style="display:none">
-        <table id="chatGrid" style="display:none" class="table table-bordered table-striped">
+    <div class="table-responsive">
+        <table id="chatGrid" class="table table-bordered table-striped">
             <thead>
                 <tr>
+                    <th></th>
                     <th>Sender Id</th>
                     <th>Question</th>
                     <th>Answer</th>
@@ -42,15 +36,13 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var chat in Model)
-                {
-                    <tr>
-                        <td>@chat.SenderId</td>
-                        <td>@chat.Question</td>
-                        <td>@chat.Answer</td>
-                        <td>@chat.CreatedAt</td>
-                    </tr>
-                }
+                <tr>
+                    <td></td>
+                    <td>SenderId</td>
+                    <td>Question</td>
+                    <td>Answer</td>
+                    <td>CreatedAt</td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -58,12 +50,100 @@
 
 <script>
     $(document).ready(function () {
-        $('#chatGrid').DataTable();
-    });
-    $(document).ready(function () {
+        // Set the first option as selected
+        $("#businessDropdown option:first").attr("selected", "selected");
         // Initialize DataTable
-        var dataTable = $('#chatGrid').DataTable();
-        
+        var dataTable = $('#chatGrid').DataTable({
+            ajax: '@Url.Action("GetBusinessChatList", "Business")' + '?businessId=1', //+ $("#businessDropdown").val(),
+            columns: [
+                {
+                    className: 'dt-control',
+                    orderable: false,
+                    data: null,
+                    defaultContent: ''
+                },
+                { data: 'SenderId' },
+                { data: 'Question' },
+                { data: 'Answer' },
+                { data: 'CreatedAt' }
+            ],
+            order: [[1, 'asc']]
+        });
+
+        // Handle row click event to expand/collapse subgrid
+        $('#chatGrid tbody').on('click', 'td.dt-control', function () {
+            debugger
+            var tr = $(this).closest('tr');
+            var row = dataTable.row(tr);
+            var rowData = row.data();
+
+            if (row.child.isShown()) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown');
+
+                // Destroy the Child Datatable
+                $('#' + rowData.SenderId).DataTable().destroy();
+            } else {
+                // Open this row
+                row.child(format(rowData)).show();
+                loadSubgrid(tr, rowData);
+            }
+        });
+
+        function format(rowData) {
+            return '<table id="' + rowData.SenderId + '" cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">' +           /*rowData[0] = SenderId*/
+                '<thead>' +
+                '<tr>' +
+                '<th>Sender Id</th>' +
+                '<th>Question</th>' +
+                '<th>Answer</th>' +
+                '<th>Created At</th>' +
+                '</tr>' +
+                '</thead>' +
+                '<tbody></tbody>' +
+                '</table>';
+        }
+
+        function loadSubgrid(tr, rowData) {
+            var senderId = rowData.SenderId;
+            $.ajax({
+                url: 'GetChatsBySenderId',
+                type: 'GET',
+                data: { senderId: senderId },
+                success: function (data) {
+                    debugger
+                    // Add subgrid data
+                    var subgridData = data.map(function (item) {
+                        return [
+                            item.SenderId,
+                            item.Question,
+                            item.Answer,
+                            item.CreatedAt
+                        ];
+                    });
+
+                    $('#' + senderId).DataTable({
+                        dom: "t",
+                        data: subgridData,
+                        columns: [
+                            { data: 0 }, // Sender Id
+                            { data: 1 }, // Question
+                            { data: 2 }, // Answer
+                            { data: 3 }  // Created At
+                        ],
+                        scrollY: '400px',
+                        select: true,
+                    });
+
+                    tr.addClass('shown');
+                },
+                error: function () {
+                    console.error('Failed to load chats for the selected SenderId.');
+                }
+            });
+        }
+
         // Handle dropdown change event
         $('#businessDropdown').change(function () {
             var selectedBusinessId = $(this).val();
@@ -73,12 +153,12 @@
                     url: 'GetBusinessChatList',
                     type: 'GET',
                     data: { businessId: selectedBusinessId },
-                    success: function (data) {
+                    success: function (response) {
                         // Clear existing rows in DataTable
                         dataTable.clear();
 
                         // Extract and add new rows to DataTable
-                        data.forEach(function (item) {
+                        response.data.forEach(function (item) {
                             dataTable.row.add([
                                 item.SenderId,
                                 item.Question,

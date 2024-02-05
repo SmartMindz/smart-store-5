@@ -213,7 +213,7 @@ namespace BizsolTech.Chatbot.Services
                     { "BusinessMemoryId", $"{businessMemoryId}" }
                 };
 
-                var response = await _apiHandler.GetAsync(apiUrl, parameters);
+                var response = await _apiHandler.DeleteAsync(apiUrl, parameters);
 
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {

@@ -24,6 +24,7 @@ namespace BizsolTech.Chatbot.Helpers
             try
             {
                 var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("x-api-key", "db9a7d17-7e0f-44a8-8909-40212189af92");
                 var fullUrl = BuildUrlWithParameters(_baseUrl + apiUrl, parameters);
 
                 var response = await client.GetAsync(fullUrl);
@@ -49,6 +50,7 @@ namespace BizsolTech.Chatbot.Helpers
             try
             {
                 var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("x-api-key", "db9a7d17-7e0f-44a8-8909-40212189af92");
                 var fullUrl = BuildUrlWithParameters(_baseUrl + apiUrl, parameters);
 
                 var jsonRequest = JsonConvert.SerializeObject(requestBody);
@@ -77,6 +79,7 @@ namespace BizsolTech.Chatbot.Helpers
             try
             {
                 var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("x-api-key", "db9a7d17-7e0f-44a8-8909-40212189af92");
                 var fullUrl = BuildUrlWithParameters(_baseUrl + apiUrl, parameters);
 
                 var jsonRequest = JsonConvert.SerializeObject(requestBody);
@@ -97,6 +100,32 @@ namespace BizsolTech.Chatbot.Helpers
             catch (Exception ex)
             {
                 throw new Exception("Error executing PUT request", ex);
+            }
+        }
+
+        public async Task<(string ResponseContent, HttpStatusCode StatusCode)> DeleteAsync(string apiUrl, Dictionary<string, string>? parameters = null)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("x-api-key", "db9a7d17-7e0f-44a8-8909-40212189af92");
+                var fullUrl = BuildUrlWithParameters(_baseUrl + apiUrl, parameters);
+
+                var response = await client.DeleteAsync(fullUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    return (responseData, response.StatusCode);
+                }
+                else
+                {
+                    return (string.Empty, response.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error executing Delete request", ex);
             }
         }
 

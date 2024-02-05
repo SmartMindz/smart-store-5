@@ -30,9 +30,6 @@ using Smartstore.Web.Controllers;
 using Smartstore.Web.Modelling;
 using Smartstore.Web.Modelling.Settings;
 using Smartstore.Web.Models.DataGrid;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using static Smartstore.Core.Security.Permissions;
 
 namespace BizsolTech.Chatbot.Controllers
 {
@@ -44,6 +41,7 @@ namespace BizsolTech.Chatbot.Controllers
         private readonly IBusinessDocumentService _businessDocumentService;
         private readonly IBusinessAPIService _businessAPI;
         private readonly IS3StorageService _s3StorageService;
+        private readonly ChatbotSettings _chatbotSettings;
         private readonly IMediaService _mediaService;
         private readonly IMediaTypeResolver _mediaTypeResolver;
         private readonly MediaSettings _mediaSettings;
@@ -59,6 +57,7 @@ namespace BizsolTech.Chatbot.Controllers
             IBusinessDocumentService businessDocumentService,
             IBusinessAPIService businessAPIService,
             IS3StorageService s3StorageService,
+            ChatbotSettings chatbotSettings,
             IMediaService mediaService,
             IMediaTypeResolver mediaTypeResolver,
             MediaSettings mediaSettings,
@@ -73,6 +72,7 @@ namespace BizsolTech.Chatbot.Controllers
             _businessDocumentService = businessDocumentService;
             _businessAPI = businessAPIService;
             _s3StorageService = s3StorageService;
+            _chatbotSettings = chatbotSettings;
             _mediaService = mediaService;
             _mediaTypeResolver = mediaTypeResolver;
             _mediaSettings = mediaSettings;
@@ -86,7 +86,7 @@ namespace BizsolTech.Chatbot.Controllers
         private string GetFacebookCallbackUrl()
         {
             var baseDomainUrl = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}";
-            return baseDomainUrl + "/api/webhook?businessId=";
+            return _chatbotSettings.FacebookCallbackUrlBase + "/api/webhook?businessId=";
         }
         private void PrepareBusinessModel(BusinessModel model, Business entity)
         {
@@ -594,7 +594,19 @@ namespace BizsolTech.Chatbot.Controllers
         [HttpGet]
         public async Task<IActionResult> ChatList()
         {
+            var customer = _workContext.CurrentCustomer;
+            var businesses = await _businessService.GetCustomerBusinessAll(customer);
+            ViewBag.Businesses = new SelectList(businesses, "Id", "BusinessName");
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetChatsBySenderId(string senderId)
+        {
             var chats = await _businessChatService.GetBusinessChatAll();
+
+            chats = chats.Where(c => string.Equals(c.SenderId, senderId, StringComparison.OrdinalIgnoreCase)).ToList();
+
             var rows = chats.Select(b =>
                 new BusinessChatModel
                 {
@@ -606,16 +618,17 @@ namespace BizsolTech.Chatbot.Controllers
                     CreatedAt = b.CreatedAt,
                 }
                 ).ToList();
-            var customer = _workContext.CurrentCustomer;
-            var businesses = await _businessService.GetCustomerBusinessAll(customer);
-            ViewBag.Businesses = new SelectList(businesses, "Id", "BusinessName");
-            return View(rows);
+
+            return Json(rows);
         }
+
         [HttpGet]
         public async Task<JsonResult> GetBusinessChatList(int businessId)
         {
             var chats = await _businessChatService.GetBusinessChatByBusinessId(businessId);
-            var rows = chats.Select(b =>
+            var mostRecentDistinctChats = chats.GroupBy(c => c.SenderId)
+                                       .Select(group => group.OrderByDescending(c => c.CreatedAt).First());
+            var rows = mostRecentDistinctChats.Select(b =>
                 new BusinessChatModel
                 {
                     Id = b.Id,
@@ -626,7 +639,7 @@ namespace BizsolTech.Chatbot.Controllers
                     CreatedAt = b.CreatedAt,
                 }
             ).ToList();
-            return new JsonResult(rows);
+            return new JsonResult(new { data = rows });
         }
         [HttpPost]
         public async Task<IActionResult> ChatList1(GridCommand command, BusinessListModel model)
