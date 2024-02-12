@@ -9,6 +9,20 @@
     .row {
         margin-bottom: 10px;
     }
+
+    .input-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .clipboard-btn {
+        margin-left: 5px;
+        display: none;
+    }
+
+    .input-container:hover .clipboard-btn {
+        display: inline-block;
+    }
 </style>
 
 <widget target-zone="teaser">
@@ -40,10 +54,8 @@
                 </div>
                 <div class="adminData col-md-9">
                     <div class="input-container" data-clipboard-text="@Model.FBCallbackUrl">
-                        <div class="input-group">
-                            <input class="key form-control" asp-for="FBCallbackUrl" placeholder="Facebook Callback Url" disabled />
-                            <button class="btn btn-secondary btn-sm clipboard-btn" type="button" style="display:none"><i class="fas fa-copy"></i></button>
-                        </div>
+                        <input class="key" asp-for="FBCallbackUrl" placeholder="Facebook Callback Url" disabled />
+                        <button class="btn btn-secondary btn-sm clipboard-btn" type="button"><i class="fas fa-copy"></i></button>
                     </div>
                 </div>
             </div>
@@ -53,10 +65,8 @@
                 </div>
                 <div class="adminData col-md-9">
                     <div class="input-container" data-clipboard-text="@Model.FBWebhookVerifyToken">
-                        <div class="input-group">
-                            <input class="key form-control" asp-for="FBWebhookVerifyToken" placeholder="Facebook Webhook Verify Token" disabled />
-                            <button class="btn btn-secondary btn-sm clipboard-btn" type="button" style="display:none"><i class="fas fa-copy"></i></button>
-                        </div>
+                        <input class="key" asp-for="FBWebhookVerifyToken" placeholder="Facebook Webhook Verify Token" disabled />
+                        <button class="btn btn-secondary btn-sm clipboard-btn" type="button"><i class="fas fa-copy"></i></button>
                     </div>
                 </div>
             </div>
@@ -65,7 +75,7 @@
                     <smart-label asp-for="FBPageId" />
                 </div>
                 <div class="adminData col-md-9">
-                    <input class="key" asp-for="FBPageId" placeholder="Facebook page id" />
+                    <input class="key" type="text" asp-for="FBPageId" placeholder="Facebook page id" />
                     <span asp-validation-for="FBPageId"></span>
                 </div>
             </div>
@@ -76,6 +86,15 @@
                 <div class="adminData col-md-9">
                     <input class="key" asp-for="FBAccessToken" placeholder="Facebook access token" />
                     <span asp-validation-for="FBAccessToken"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="adminTitle col-md-3">
+                    <smart-label asp-for="FBAppSecret" />
+                </div>
+                <div class="adminData col-md-9">
+                    <input class="key" asp-for="FBAppSecret" placeholder="Facebook app secret" />
+                    <span asp-validation-for="FBAppSecret"></span>
                 </div>
             </div>
             <div class="row" style="justify-content:flex-end;">
@@ -102,15 +121,6 @@
     $(document).ready(function () {
         checkAndShowConnectionButton();
 
-        $('.input-container').hover(
-            function () {
-                $(this).find('.clipboard-btn').show();
-            },
-            function () {
-                $(this).find('.clipboard-btn').hide();
-            }
-        );
-
         $('.clipboard-btn').on('click', function (event) {
             event.stopPropagation(); // Prevents the input container click event
             var clipboardText = $(this).closest('.input-container').data('clipboard-text');
@@ -123,7 +133,7 @@
     });
 
     nextButton.on('click', function () {
-        window.location.href = '@Url.Action("List", "Business")';
+        window.location.href = '@Url.Action("Home", "Business", new { area = "Admin" })';
     });
 
     function testConnection() {

@@ -21,6 +21,8 @@ namespace BizsolTech.Models.Business
 
         [JsonProperty("facebookAccessToken")]
         public string? FBAccessToken { get; set; }
+        [JsonProperty("facebookAppSecret")]
+        public string? FBAppSecret { get; set; }
 
         [JsonProperty("facebookAccessTokenStatus")]
         public bool FBStatus { get; set; }

@@ -16,6 +16,8 @@
       <Compile Remove="Events\OrderPlacedEventConsumer.cs" />
     </ItemGroup>
     <ItemGroup>
+      <Content Remove="Views\Business\ChatList.cshtml" />
+      <Content Remove="Views\Business\List.cshtml" />
       <Content Remove="wwwroot\css\jquery.dataTables.min.css" />
     </ItemGroup>
     <ItemGroup>
@@ -23,6 +25,11 @@
       <None Remove="Scripts\js\kendo.all.min.js" />
       <None Remove="Views\Business\ChatList.cshtml" />
       <None Remove="Views\Business\Grids\_Grid.BusinessChat.cshtml" />
+      <None Remove="Views\Business\Home.cshtml" />
+      <None Remove="Views\Business\List.cshtml" />
+      <None Remove="Views\Business\Partials\_BusinessHome.cshtml" />
+      <None Remove="Views\Business\Partials\_ChatList.cshtml" />
+      <None Remove="Views\Business\Partials\_List.cshtml" />
       <None Remove="wwwroot\kendo\kendo.common.min.css" />
       <None Remove="wwwroot\kendo\kendo.default.min.css" />
     </ItemGroup>

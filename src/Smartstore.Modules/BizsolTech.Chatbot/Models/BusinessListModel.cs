@@ -6,10 +6,10 @@ using Smartstore.Web.Modelling;
 
 namespace BizsolTech.Chatbot.Models
 {
-    public class BusinessListModel:ModelBase
+    public class BusinessListModel : ModelBase
     {
     }
-    public class BusinessModel: TabbableModel
+    public class BusinessModel : TabbableModel
     {
         public BusinessModel()
         {
@@ -20,6 +20,8 @@ namespace BizsolTech.Chatbot.Models
         public long? FBPageId { get; set; }
         [LocalizedDisplay("Chatbot.Fields.FBAccessToken")]
         public string FBAccessToken { get; set; }
+        [LocalizedDisplay("Chatbot.Fields.FBAppSecret")]
+        public string FBAppSecret { get; set; }
         public bool FBStatus { get; set; }
         public string FBWebhookVerifyToken { get; set; }
         public bool FBWebhookStatus { get; set; }
@@ -51,7 +53,7 @@ namespace BizsolTech.Chatbot.Models
         public string Instruction { get; set; }
 
         [LocalizedDisplay("Chatbot.Fields.Documents")]
-        public virtual IList<BusinessDocumentEntity> Documents { get; set; } 
+        public virtual IList<BusinessDocumentEntity> Documents { get; set; }
         public string EditUrl { get; set; }
     }
 }

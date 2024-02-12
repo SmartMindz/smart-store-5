@@ -1,28 +1,21 @@
 ﻿@{
-    ViewBag.Title = "Business Chat";
-    Layout = "_Layout";
-
     var businesses = ViewBag.Businesses as SelectList;
 }
 
-<widget target-zone="stylesheets">
-    <link rel="stylesheet" href="@Url.Content("~/modules/BizsolTech.Chatbot/css/jquery.dataTables.min.css")" />
-</widget>
-<widget target-zone="head_scripts">
-    <script src="@Url.Content("~/modules/BizsolTech.Chatbot/js/jquery.dataTables.min.js")"></script>
-</widget>
-
 <div class="col col-md-12">
-    <div class="row" style="justify-content:space-between; padding-bottom:10px;">
-        <div class="col-md-2"> <h2>Business Chats</h2> </div>
-    </div>
-    <div class="col-md-4">
-        <select id="businessDropdown">
-            @foreach (var item in businesses)
-            {
-                <option value="@item.Value">@item.Text</option>
-            }
-        </select>
+
+    <div class="row" style="padding-bottom:10px;">
+        <div class="col-md-2">
+            <label for="businessDropdown">Select Business:</label>
+        </div>
+        <div class="col-md-3">
+            <select id="businessDropdown">
+                @foreach (var item in businesses)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            </select>
+        </div>
     </div>
     <div class="table-responsive">
         <table id="chatGrid" class="table table-bordered table-striped">
@@ -36,13 +29,6 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td></td>
-                    <td>SenderId</td>
-                    <td>Question</td>
-                    <td>Answer</td>
-                    <td>CreatedAt</td>
-                </tr>
             </tbody>
         </table>
     </div>
@@ -50,11 +36,14 @@
 
 <script>
     $(document).ready(function () {
+        $("#businessDropdown").select2();
         // Set the first option as selected
         $("#businessDropdown option:first").attr("selected", "selected");
+        var selectedBusinessId = $("#businessDropdown").val();
+        var bId = parseInt(selectedBusinessId);
         // Initialize DataTable
         var dataTable = $('#chatGrid').DataTable({
-            ajax: '@Url.Action("GetBusinessChatList", "Business")' + '?businessId=' + $("#businessDropdown").val(),
+            ajax: '@Url.Action("GetBusinessChatList", "Business")' + '?businessId=52',// + bId,
             columns: [
                 {
                     className: 'dt-control',
@@ -66,8 +55,7 @@
                 { data: 'Question' },
                 { data: 'Answer' },
                 { data: 'CreatedAt' }
-            ],
-            order: [[1, 'asc']]
+            ]
         });
 
         // Handle row click event to expand/collapse subgrid
@@ -107,41 +95,20 @@
 
         function loadSubgrid(tr, rowData) {
             var senderId = rowData.SenderId;
-            $.ajax({
-                url: 'GetChatsBySenderId',
-                type: 'GET',
-                data: { senderId: senderId },
-                success: function (data) {
-                    debugger
-                    // Add subgrid data
-                    var subgridData = data.map(function (item) {
-                        return [
-                            item.SenderId,
-                            item.Question,
-                            item.Answer,
-                            item.CreatedAt
-                        ];
-                    });
-
-                    $('#' + senderId).DataTable({
-                        dom: "t",
-                        data: subgridData,
-                        columns: [
-                            { data: 0 }, // Sender Id
-                            { data: 1 }, // Question
-                            { data: 2 }, // Answer
-                            { data: 3 }  // Created At
-                        ],
-                        scrollY: '400px',
-                        select: true,
-                    });
-
-                    tr.addClass('shown');
-                },
-                error: function () {
-                    console.error('Failed to load chats for the selected SenderId.');
-                }
+            $('#' + senderId).DataTable({
+                ajax: '@Url.Action("GetChatsBySenderId", "Business")' + '?senderId=' + senderId,
+                columns: [
+                    { data: 'SenderId' },
+                    { data: 'Question' },
+                    { data: 'Answer' },
+                    { data: 'CreatedAt' }
+                ],
+                paging: true,
+                scrollY: '400px',
+                select: true
             });
+
+            tr.addClass('shown');
         }
 
         // Handle dropdown change event

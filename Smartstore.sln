@@ -87,9 +87,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BizsolTech.Chatbot", "src\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Smartstore.PageBuilder", "src\Smartstore.Modules\Smartstore.PageBuilder\Smartstore.PageBuilder.csproj", "{879A6BF2-50EB-404F-A2E7-85998E42F71F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartstore.PayPal.Subscription", "src\Smartstore.Modules\Smartstore.PayPal.Subscription\Smartstore.PayPal.Subscription.csproj", "{EE284C65-2D59-48DB-BD04-9FEFD5FDCBA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Smartstore.PayPal.Subscription", "src\Smartstore.Modules\Smartstore.PayPal.Subscription\Smartstore.PayPal.Subscription.csproj", "{EE284C65-2D59-48DB-BD04-9FEFD5FDCBA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartstore.Stripe.Subscription", "src\Smartstore.Modules\Smartstore.Stripe.Subscription\Smartstore.Stripe.Subscription.csproj", "{F3C5EB8A-655D-4EAE-91E9-05955603789B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Smartstore.Stripe.Subscription", "src\Smartstore.Modules\Smartstore.Stripe.Subscription\Smartstore.Stripe.Subscription.csproj", "{F3C5EB8A-655D-4EAE-91E9-05955603789B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

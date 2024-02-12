@@ -102,6 +102,7 @@ namespace BizsolTech.Chatbot.Controllers
                 model.CollectionName = entity.CollectionName;
                 model.FBPageId = long.Parse(entity.FBPageId);
                 model.FBAccessToken = entity.FBAccessToken;
+                model.FBAppSecret = entity.FBAppSecret;
                 model.FBStatus = entity.FBStatus;
                 model.FBWebhookVerifyToken = entity.FBWebhookVerifyToken;
                 model.FBWebhookStatus = entity.FBWebhookStatus;
@@ -121,12 +122,20 @@ namespace BizsolTech.Chatbot.Controllers
         private async Task<List<BusinessDocumentEntity>> PrepareBusinessDocuments(int businessId)
         {
             var businessDocuments = await _businessDocumentService.GetAllAsync();
-            businessDocuments = businessDocuments.Where(d => d.BusinessPageId == businessId).ToList();
+            businessDocuments = businessDocuments.Where(d => d.BusinessPageId == businessId && !d.Deleted).ToList();
             if (businessDocuments.Count > 0) return businessDocuments;
             else return new List<BusinessDocumentEntity>();
         }
 
         #endregion
+
+        [HttpGet]
+        [Area("Admin")]
+        [Route("business/{action}/{id?}")]
+        public ActionResult Home()
+        {
+            return View();
+        }
 
         [HttpGet]
         public async Task<IActionResult> Index(int? id)
@@ -272,6 +281,7 @@ namespace BizsolTech.Chatbot.Controllers
                             Name = fileName,
                             Size = int.Parse(fileSize.ToString()),
                             UpdateRequired = true,
+                            Deleted = false,
                             FileUrl = "fileURL",
                             Extension = extension,
                             CRC = crc.ToString(),
@@ -287,6 +297,7 @@ namespace BizsolTech.Chatbot.Controllers
                                 existingFile.CRC = crc.ToString();
                                 existingFile.Size = int.Parse(fileSize.ToString());
                                 existingFile.UpdateRequired = true;
+                                existingFile.Deleted = false;
                                 await _businessDocumentService.Update(existingFile);
                                 await _s3StorageService.AddDocument(existingFile, _response.BusinessName, fileName, existingFile.FileUrl, byteArray, false);
                             }
@@ -354,7 +365,7 @@ namespace BizsolTech.Chatbot.Controllers
         [HttpPost]
         public async Task<IActionResult> TestFacebookPageConnection(BusinessModel model, IFormCollection form)
         {
-            var success = await _businessAPI.VerifyFacebookCredentials(model.Id, model.FBPageId.ToString(), model.FBAccessToken);
+            var success = await _businessAPI.VerifyFacebookCredentials(model.Id, model.FBPageId.ToString(), model.FBAccessToken, model.FBAppSecret);
             //store params
             var sessionStored = _httpContextAccessor.HttpContext?.Session.TrySetObject<BusinessModel>("BusinessInput", model);
             return Json(new { success = success });
@@ -383,6 +394,8 @@ namespace BizsolTech.Chatbot.Controllers
         }
 
         [HttpGet]
+        [Area("Admin")]
+        [Route("business/{action}")]
         public async Task<IActionResult> List()
         {
             //var model = new BusinessListModel();
@@ -422,11 +435,11 @@ namespace BizsolTech.Chatbot.Controllers
                     IsActive = true,
                     CreatedOnUtc = DateTime.Now.ToUniversalTime(),
                     UpdatedOnUtc = DateTime.Now.ToUniversalTime(),
-                    EditUrl = Url.Action(nameof(Index), "Business", new { id = b.Id })
+                    EditUrl = Url.Action(nameof(Index), "Business", new { area = $"{Module.ModuleSystemName}", id = b.Id })
                 }
                 ).ToList();
 
-                return View(rows);
+                return PartialView("_List", rows);
             }
             catch (Exception e)
             {
@@ -592,15 +605,18 @@ namespace BizsolTech.Chatbot.Controllers
         }
 
         [HttpGet]
+        [Area("Admin")]
+        [Route("business/{action}")]
         public async Task<IActionResult> ChatList()
         {
             var customer = _workContext.CurrentCustomer;
             var businesses = await _businessService.GetCustomerBusinessAll(customer);
             ViewBag.Businesses = new SelectList(businesses, "Id", "BusinessName");
-            return View();
+            return PartialView("_ChatList");
         }
 
         [HttpGet]
+        [Area("Admin")]
         public async Task<IActionResult> GetChatsBySenderId(string senderId)
         {
             var chats = await _businessChatService.GetBusinessChatAll();
@@ -617,13 +633,14 @@ namespace BizsolTech.Chatbot.Controllers
                     Answer = b.Answer,
                     CreatedAt = b.CreatedAt,
                 }
-                ).ToList();
+                ).OrderByDescending(x => x.CreatedAt).ToList();
 
-            return Json(rows);
+            return Json(new { data = rows });
         }
 
         [HttpGet]
-        public async Task<JsonResult> GetBusinessChatList(int businessId)
+        [Area("Admin")]
+        public async Task<IActionResult> GetBusinessChatList(int businessId)
         {
             var chats = await _businessChatService.GetBusinessChatByBusinessId(businessId);
             var mostRecentDistinctChats = chats.GroupBy(c => c.SenderId)
@@ -639,8 +656,9 @@ namespace BizsolTech.Chatbot.Controllers
                     CreatedAt = b.CreatedAt,
                 }
             ).ToList();
-            return new JsonResult(new { data = rows });
+            return Json(new { data = rows });
         }
+
         [HttpPost]
         public async Task<IActionResult> ChatList1(GridCommand command, BusinessListModel model)
         {

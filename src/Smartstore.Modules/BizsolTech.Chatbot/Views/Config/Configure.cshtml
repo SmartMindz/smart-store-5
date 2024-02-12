@@ -14,7 +14,7 @@
 </widget>
 
 <form asp-action="Configure">
-
+    <input type="hidden" asp-for="ChatPromptId" />
     <div class="adminContent">
         <div class="adminRow">
             <div class="adminTitle">
@@ -50,6 +50,15 @@
             <div class="adminData">
                 <setting-editor asp-for="FacebookCallbackUrlBase" />
                 <span asp-validation-for="FacebookCallbackUrlBase"></span>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="ChatPrompt" />
+            </div>
+            <div class="adminData">
+                <textarea asp-for="ChatPrompt" rows="10" placeholder="Place prompt here"></textarea>
+                <span asp-validation-for="ChatPrompt"></span>
             </div>
         </div>
     </div>

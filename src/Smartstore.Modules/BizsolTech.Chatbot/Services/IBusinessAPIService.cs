@@ -20,7 +20,7 @@ namespace BizsolTech.Chatbot.Services
 {
     public interface IBusinessAPIService
     {
-        Task<bool> VerifyFacebookCredentials(int businessId, string pageId, string accessToken);
+        Task<bool> VerifyFacebookCredentials(int businessId, string pageId, string accessToken, string appSecret);
         Task<bool> VerifyOpenAICredentials(int businessId, string apiKey);
         Task<BusinessMemory> AddDocumentContent(int businessId, string content);
         Task<bool> DeleteDocumentContent(int businessId, int businessMemoryId);
@@ -29,6 +29,11 @@ namespace BizsolTech.Chatbot.Services
         Task<Business> GetBusiness(int businessId);
         Task<Business> AddBusiness(Business business);
         Task<bool> UpdateBusiness(Business business);
+
+        //Chat Prompt
+        Task<BusinessChatPrompt> AddChatPrompt(BusinessChatPrompt chatprompt);
+        Task<bool> UpdateChatPrompt(BusinessChatPrompt chatprompt);
+        Task<BusinessChatPrompt> GetChatPrompt(int promptId);
     }
 
     public class BusinessAPIService : IBusinessAPIService
@@ -45,7 +50,8 @@ namespace BizsolTech.Chatbot.Services
 
         public async Task<Business> GetBusiness(int businessId)
         {
-            try {
+            try
+            {
                 var apiUrl = "/api/Business/Get";
                 Dictionary<string, string> parameters = new Dictionary<string, string>() {
                     { "businessId", $"{businessId}" }
@@ -56,7 +62,7 @@ namespace BizsolTech.Chatbot.Services
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     var responseData = response.ResponseContent;
-                    Business business = new Business() { BusinessName = ""};
+                    Business business = new Business() { BusinessName = "" };
                     return business.ToModel(responseData);
                 }
                 else
@@ -65,7 +71,8 @@ namespace BizsolTech.Chatbot.Services
                     return null;
                 }
             }
-            catch(Exception e) {
+            catch (Exception e)
+            {
                 Logger.Error(e);
                 return null;
             }
@@ -117,7 +124,7 @@ namespace BizsolTech.Chatbot.Services
 
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    Business model = new Business() { BusinessName = string.Empty};
+                    Business model = new Business() { BusinessName = string.Empty };
                     return model.ToModel(response.ResponseContent);
                 }
                 else
@@ -232,7 +239,7 @@ namespace BizsolTech.Chatbot.Services
             }
         }
 
-        public async Task<bool> VerifyFacebookCredentials(int businessId, string pageId, string accessToken)
+        public async Task<bool> VerifyFacebookCredentials(int businessId, string pageId, string accessToken, string appSecret)
         {
             try
             {
@@ -241,7 +248,8 @@ namespace BizsolTech.Chatbot.Services
                 var requestBody = new
                 {
                     pageId = pageId,
-                    accessToken = accessToken
+                    accessToken = accessToken,
+                    appSecret = appSecret
                 };
 
                 //parameters
@@ -305,6 +313,97 @@ namespace BizsolTech.Chatbot.Services
             }
         }
 
+        public async Task<BusinessChatPrompt> GetChatPrompt(int id)
+        {
+            try
+            {
+                var apiUrl = "/api/Business/GetPrompt";
+                Dictionary<string, string> parameters = new Dictionary<string, string>() {
+                    { "promptId", $"{id}" }
+                };
 
+                var response = await _apiHandler.GetAsync(apiUrl, parameters);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    var responseData = response.ResponseContent;
+                    var prompt = JsonConvert.DeserializeObject<BusinessChatPrompt>(responseData);
+                    return prompt;
+                }
+                else
+                {
+                    Logger.Error($"GetChatPrompt: API response:{response.StatusCode}");
+                    return null;
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+                return null;
+            }
+        }
+
+        public async Task<BusinessChatPrompt> AddChatPrompt(BusinessChatPrompt chatprompt)
+        {
+            try
+            {
+                var apiUrl = "/api/Business/InsertPrompt";
+
+                var requestBody = new
+                {
+                    chatPrompt = chatprompt.ChatPrompt //required
+                };
+
+                var response = await _apiHandler.PostAsync(apiUrl, requestBody);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    var responseData = response.ResponseContent;
+                    var prompt = JsonConvert.DeserializeObject<BusinessChatPrompt>(responseData);
+                    return prompt;
+                }
+                else
+                {
+                    Logger.Error($"AddChatPrompt: API response:{response.StatusCode}");
+                    return null;
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateChatPrompt(BusinessChatPrompt entity)
+        {
+            try
+            {
+                var apiUrl = "/api/Business/UpdatePrompt";
+
+                Dictionary<string, string> parameters = new Dictionary<string, string>() {
+                    { "promptId", $"{entity.Id}" }
+                };
+                var requestBody = new
+                {
+                    chatPrompt = entity.ChatPrompt
+                };
+
+                var response = await _apiHandler.PutAsync(apiUrl, requestBody, parameters);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    return true;
+                }
+                else
+                {
+                    Logger.Error($"UpdateChatPrompt: API response:{response.StatusCode}");
+                    return false;
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }

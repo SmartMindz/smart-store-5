@@ -8,5 +8,6 @@ namespace BizsolTech.Chatbot.Configuration
         public string AccessKey { get; set; } = string.Empty;
         public string SecretKey { get; set; } = string.Empty;
         public string FacebookCallbackUrlBase { get; set; } = string.Empty;
+        public string ChatPrompt { get; set; } = string.Empty;
     }
 }

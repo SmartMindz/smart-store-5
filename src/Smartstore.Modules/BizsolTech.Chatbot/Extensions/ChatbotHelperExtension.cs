@@ -20,6 +20,7 @@ namespace BizsolTech.Chatbot.Extensions
                 BusinessName = jsonResponse.businessName ?? "",
                 FBPageId = jsonResponse.facebookPageId,
                 FBAccessToken = jsonResponse.facebookAccessToken ?? "",
+                FBAppSecret = jsonResponse.facebookAppSecret ?? "",
                 FBStatus = jsonResponse.facebookAccessTokenStatus,
                 FBWebhookVerifyToken = jsonResponse.facebookWebhookVerifyToken ?? "",
                 FBWebhookStatus = jsonResponse.facebookWebhookVerifyTokenStatus,

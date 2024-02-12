@@ -1,28 +1,9 @@
 ﻿﻿@using BizsolTech.Chatbot.Models;
 @model IEnumerable<BizsolTech.Chatbot.Models.BusinessModel>
 
-@{
-    ViewBag.Title = "Business List";
-    Layout = "_Layout";
-}
-
-<style>
-    #businessGrid th,
-    #businessGrid td {
-        width: 100px; /* not working dk why :( */
-    }
-</style>
-
-<widget target-zone="stylesheets">
-    <link rel="stylesheet" href="@Url.Content("~/modules/BizsolTech.Chatbot/css/jquery.dataTables.min.css")" />
-</widget>
-<widget target-zone="head_scripts">
-    <script src="@Url.Content("~/modules/BizsolTech.Chatbot/js/jquery.dataTables.min.js")"></script>
-</widget>
-
 <div class="col col-md-12">
     <div class="row" style="justify-content:space-between; padding-bottom:10px;">
-        <div class="col-md-2"> <h2>Business List</h2> </div>
+        <div class="col-md-2"></div>
         <div class="col-md-2" style="text-align: right;">
             <button id="add-business" class="btn btn-primary" type="button">Add new</button>
         </div>
@@ -69,7 +50,7 @@
                         </td>
                         <td>
                             <div>
-                                <span class="delete-icon" onclick="deleteBusiness('@Url.Action("DeleteBusiness", "Business", new { businessId = business.Id})')">
+                                <span class="delete-icon" onclick="deleteBusiness('@Url.Action("DeleteBusiness", "Business", new { area = "BizsolTech.Chatbot", businessId = business.Id})')">
                                     <i class="fas fa-trash-alt"></i>
                                 </span>
                             </div>
@@ -81,7 +62,7 @@
     </div>
 </div>
 
-<script sm-target-zone="scripts" data-origin="business-grid">
+<script>
     $(document).ready(function () {
         var businessGrid = $('#businessGrid').DataTable();
 
@@ -110,29 +91,29 @@
         });
 
         $('#add-business').on('click', function () {
-            window.location.href = '@Url.Action("Index", "Business")';
+            window.location.href = '@Url.Action("Index", "Business", new { area = "BizsolTech.Chatbot" })';
         });
-    });
 
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(function () {
-            displayNotification('Text successfully copied to clipboard', 'warning');
-        }).catch(function (err) {
-            displayNotification('Unable to copy text to clipboard', 'error');
-        });
-    }
-
-    function deleteBusiness(url) {
-        if (confirm("Are you sure you want to delete this business?")) {
-            $.ajax({
-                url: url,
-                type: 'GET',
-                success: function () {
-                },
-                error: function () {
-                    alert('Error deleting business.');
-                }
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function () {
+                displayNotification('Text successfully copied to clipboard', 'warning');
+            }).catch(function (err) {
+                displayNotification('Unable to copy text to clipboard', 'error');
             });
         }
-    }
+
+        function deleteBusiness(url) {
+            if (confirm("Are you sure you want to delete this business?")) {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function () {
+                    },
+                    error: function () {
+                        alert('Error deleting business.');
+                    }
+                });
+            }
+        }
+    });
 </script>

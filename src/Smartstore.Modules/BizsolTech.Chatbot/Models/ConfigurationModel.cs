@@ -2,7 +2,7 @@
 
 namespace BizsolTech.Chatbot.Models
 {
-    public class ConfigurationModel: ModelBase
+    public class ConfigurationModel : ModelBase
     {
         [LocalizedDisplay("Bucket Name")]
         public string BucketName { get; set; }
@@ -12,5 +12,8 @@ namespace BizsolTech.Chatbot.Models
         public string SecretKey { get; set; }
         [LocalizedDisplay("Facebook Callback Url Base")]
         public string FacebookCallbackUrlBase { get; set; }
+        [LocalizedDisplay("Chat Prompt")]
+        public string ChatPrompt { get; set; }
+        public int ChatPromptId { get; set; } = 0;
     }
 }
